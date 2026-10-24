@@ -28,5 +28,15 @@
   if(sourceImage&&sourceImage!==base.image){result.source_url='';result.source_note='사용자가 가져온 공식 소개 이미지. AI 초벌 번역 원본.'}
   result.image=sourceImage||base.image||'';result.limited=result.acquisition==='한정';return result;
  }
- globalThis.EditorModel={elements,roles,clone,blank,numeric,validate,normalized,applyTranslation};
+ function findVoice(memory,entries){
+  const normalize=value=>(value||'').normalize('NFKC').replace(/\s+/gu,'').toLowerCase();
+  const ja=normalize(memory.character_ja),ko=normalize(memory.character_ko);
+  if(!ja&&!ko)throw Error('캐릭터명을 먼저 입력해 주세요.');
+  const matches=entries.map(entry=>entry.memory||entry).filter(k=>{const otherJa=normalize(k.character_ja);return ja&&otherJa?ja===otherJa:Boolean(ko&&ko===normalize(k.character_ko))}).filter(k=>k.voice_actor?.trim());
+  if(!matches.length)throw Error('같은 캐릭터의 등록된 성우 정보가 없습니다. 캐릭터명을 확인하거나 직접 입력해 주세요.');
+  const actors=new Set(matches.map(k=>k.voice_actor.trim())),urls=new Set(matches.map(k=>k.voice_actor_url?.trim()||'').filter(Boolean));
+  if(actors.size!==1||urls.size>1)throw Error('같은 캐릭터의 성우 정보가 서로 다릅니다. 기존 자료를 확인한 뒤 직접 입력해 주세요.');
+  return {voice_actor:[...actors][0],voice_actor_url:[...urls][0]||''};
+ }
+ globalThis.EditorModel={elements,roles,clone,blank,numeric,validate,normalized,applyTranslation,findVoice};
 })();

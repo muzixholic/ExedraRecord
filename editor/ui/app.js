@@ -83,7 +83,7 @@ async function previews(){
 $('#editor').addEventListener('input',change);
 for(const key of ['image','illustration_url'])field(key).addEventListener('change',previews);
 $('#editor').onsubmit=event=>{event.preventDefault();run(async()=>{
- const memory=collect();const saved=await native('save',{memory,revision});entries=saved.entries;const entry=entries.find(e=>e.memory.id===memory.id);
+ const memory=collect();if(!ExedraAffiliations.works.some(work=>work.id===memory.work)&&!await confirmUnregisteredWork())return;const saved=await native('save',{memory,revision});entries=saved.entries;const entry=entries.find(e=>e.memory.id===memory.id);
  entries.sort((a,b)=>a.memory.character_ko.localeCompare(b.memory.character_ko,'ko'));const activeTab=document.querySelector('[data-tab][aria-selected="true"]').dataset.tab;edit(entry);tab(activeTab);message('저장했습니다. 기존 자료는 자동 백업되며, 운영 사이트에는 아직 반영되지 않았습니다.');
 })};
 $('#add-skill').onclick=()=>{current.skills.push({kind:'전투 스킬',name_ko:'',name_ja:'',ko:'',ja:'',cost:null,break:null});change();renderSkills()};
@@ -135,12 +135,17 @@ for(const button of document.querySelectorAll('[data-wiki]'))button.onclick=()=>
  await native('openWiki',{url:bases[button.dataset.wiki]+encodeURIComponent(name)});
 });
 
-for(const key of ['character_ko','character_ja'])field(key).addEventListener('change',()=>{
- const normalize=value=>(value||'').normalize('NFKC').replace(/\s+/gu,'').toLowerCase();
- const ja=normalize(field('character_ja').value),ko=normalize(field('character_ko').value);
- const shared=entries.find(({memory:k})=>ja&&normalize(k.character_ja)?ja===normalize(k.character_ja):ko&&ko===normalize(k.character_ko));
- if(shared){field('voice_actor').value=shared.memory.voice_actor||'';field('voice_actor_url').value=shared.memory.voice_actor_url||'';message('등록된 캐릭터의 공통 성우 정보를 불러왔습니다.')}
-});
+function syncVoice(source,{manual=false}={}){
+ try{const value=model.findVoice({character_ko:field('character_ko').value,character_ja:field('character_ja').value},source);field('voice_actor').value=value.voice_actor;field('voice_actor_url').value=value.voice_actor_url;setDirty(true);message('같은 캐릭터의 성우와 문서 주소를 가져왔습니다. 기억 저장을 눌러 반영해 주세요.')}catch(error){if(manual)throw error}
+}
+$('#sync-voice').onclick=()=>run(async()=>{const latest=await native('load');if(!latest)throw Error('기존 캐릭터 정보를 불러오지 못했습니다.');syncVoice(latest.entries,{manual:true})});
+for(const key of ['character_ko','character_ja'])field(key).addEventListener('change',()=>syncVoice(entries));
+function confirmUnregisteredWork(){
+ const dialog=$('#work-warning-dialog');dialog.showModal();return new Promise(resolve=>{
+  const select=()=>{dialog.close();tab('basic');message('작품을 선택한 뒤 다시 저장해 주세요. 입력 내용은 유지됩니다.');setTimeout(()=>$('#work-tags button')?.focus(),0);resolve(false)};
+  $('#work-select').onclick=select;$('#work-save-anyway').onclick=()=>{dialog.close();resolve(true)};dialog.oncancel=event=>{event.preventDefault();select()};
+ });
+}
 
 if(window.desktopEditor){for(const element of document.querySelectorAll('button,p'))if(element.childElementCount===0)element.textContent=element.textContent.replaceAll('⌘S','Ctrl+S').replaceAll('이 맥','이 컴퓨터');}
 
