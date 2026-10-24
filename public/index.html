@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="마기아 엑세드라 한국어 비공식 기억 도감. 공식 원문과 한국어 번역을 함께 확인하세요."><title>엑세드라 레코드 · 기억 도감</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head><body>
+<header><a href="/" class="brand">✧ 엑세드라 레코드</a><span>비공식 한국어 도감</span></header><nav id="navigation" aria-label="주요 메뉴"></nav><main><section class="intro"><p class="eyebrow">마법소녀의 기억을 기록하다</p><h1 id="page-title">기억 도감</h1><p id="page-description">기억의 능력과 이야기를, 원문과 함께.</p></section><div id="memory-content"><section class="tools" aria-label="검색과 필터">
+<label class="search-field">기억 검색<input id="search" type="search" placeholder="캐릭터 또는 기억 이름"></label>
+<div class="filter-field"><span id="element-label" class="filter-label">속성</span><select multiple id="element" aria-labelledby="element-label"><option value="">전체</option></select><div id="element-dropdown"></div></div>
+<div class="filter-field"><span id="role-label" class="filter-label">역할</span><select multiple id="role" aria-labelledby="role-label"><option value="">전체</option></select><div id="role-dropdown"></div></div>
+<div class="group-filter"><span id="work-label" class="filter-label">작품 · 여러 개 선택</span><select id="work" multiple hidden aria-label="작품"><option value="">전체</option></select><div id="work-tags" class="tag-options" role="group" aria-labelledby="work-label"></div></div><div class="group-filter"><span id="group-label" class="filter-label">마기아 레코드 그룹 · 여러 개 선택</span><select id="group" multiple hidden aria-label="마기아 레코드 그룹"><option value="">전체</option></select><div id="group-tags" class="tag-options" role="group" aria-labelledby="group-label"></div></div><label>희귀도<select id="rarity"><option value="">전체</option></select></label>
+<label>입수 구분<select id="acquisition"><option value="">전체</option></select></label>
+<label>정렬<select id="sort"><option value="name">이름순</option><option value="rarity">희귀도순</option></select></label>
+<button type="button" id="reset-filters">필터 초기화</button>
+</section><p id="status" role="status">기억을 불러오는 중입니다.</p><div id="list"></div><nav id="pagination" aria-label="기억 목록 페이지"></nav></div>
+<section id="detail-page" hidden aria-label="기억 상세 화면"><a id="back-to-list" class="back-link" href="#memories">← 기억 목록으로</a><section id="detail" aria-label="기억 상세"></section></section>
+<section id="coming-soon" class="pending" hidden><h2>준비 중입니다</h2><p>메뉴 구성을 먼저 마련했습니다. 확인된 자료를 바탕으로 순차적으로 추가합니다.</p></section></main><footer>비공식 팬 프로젝트 · 이미지와 게임 자료의 권리는 각 권리자에게 있습니다.<br>초기 데이터에는 미입력 항목과 검토 대기 번역이 포함되어 있습니다.</footer></body></html>

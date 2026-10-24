@@ -1,0 +1,12 @@
+node_modules/
+.wrangler/
+.dev.vars
+.env*
+!.env.example
+.DS_Store
+
+# 로컬 입력 앱 빌드와 자동 백업
+dist/
+data/editor-backups/
+
+.editor-jobs/

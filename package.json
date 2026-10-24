@@ -1,0 +1,15 @@
+{
+  "name": "exedra-record",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "node --test",
+    "db:local": "wrangler d1 migrations apply exedra-record --local",
+    "db:remote": "wrangler d1 migrations apply exedra-record --remote",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
