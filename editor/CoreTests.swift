@@ -55,6 +55,13 @@ struct CoreTests {
   multiple["groups"]=["mikazuki","unknown"];mustFail { _=try store.save(multiple,expected:multiRevision) }
   multiple["groups"]=["mikazuki","mikazuki"];mustFail { _=try store.save(multiple,expected:multiRevision) }
   multiple["groups"]=["mikazuki","yachiyo"];multiple["work"]="madoka";mustFail { _=try store.save(multiple,expected:multiRevision) }
+  var portrait:[String:Any] = ["id":"test-portrait","name_ko":"이름+5","name_ja":"名前+5","rarity":4,"stats_max":["HP":637,"공격력":90,"방어력":85],"ability_levels":(0...5).map { level -> [String:Any] in ["level":level,"effects":level == 0 ? [["text_ko":"공격력 +5%","text_ja":"攻撃力+5%","condition_ko":"캐릭터 조건","condition_ja":"条件","tags":["공격력"]]] : []] }]
+  let portraitRevision=try store.savePortrait(portrait,expected:nil)
+  let portraitLoaded=try store.loadPortraits()[0]["memory"] as! [String:Any];precondition(portraitLoaded["name_ko"] as? String == "이름")
+  portrait["name_ko"]="수정+5";_=try store.savePortrait(portrait,expected:portraitRevision);mustFail { _=try store.savePortrait(portrait,expected:portraitRevision) }
+  let portraitSQL=try String(contentsOf:store.exportPortraitMigration(),encoding:.utf8);precondition(portraitSQL.contains("INSERT INTO portraits"))
+  var badPortrait=portrait;badPortrait["rarity"]=3;mustFail { try MemoryStore.validatePortrait(badPortrait) }
+  badPortrait=portrait;badPortrait["ability_levels"]=[] as [[String:Any]];mustFail { try MemoryStore.validatePortrait(badPortrait) }
   print("로컬 저장·수정·백업·충돌 방지·자료 보존·주소 검증·배포 파일 검증 통과")
  }
 }

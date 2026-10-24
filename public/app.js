@@ -1,4 +1,5 @@
 import './affiliations.js';
+import {renderPortraits} from './portraits.js';
 const affiliations=globalThis.ExedraAffiliations;
 import {relatedMemories,voiceActorLabel,characterVoice,voiceActorUrl} from './character.js';
 import {memoryMedia, memoryThumbnail} from './media.js';
@@ -135,6 +136,7 @@ async function navigate(){
  document.title='엑세드라 레코드 · '+(isDetail?'기억 상세':selected[1]);
  $('#memory-content').hidden=!isMemory||isDetail;$('#detail-page').hidden=!isDetail;$('#coming-soon').hidden=isMemory;
  for(const a of $('#navigation').querySelectorAll('a')){if(a.hash==='#'+selected[0])a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')}
+ $('#portrait-content').hidden=route.section!=='portraits';if(route.section==='portraits'){$('#coming-soon').hidden=true;$('#page-title').textContent='포트레이트 도감';$('#page-description').textContent='최대 스테이터스와 강화 단계별 어빌리티를 확인하세요.';await renderPortraits($('#portrait-content'),route,()=>version===navigationVersion);return}
  if(!isMemory)return;
  if(!isDetail){renderList(route.params);return}
  $('#back-to-list').href=listUrl(route.params);

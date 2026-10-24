@@ -43,7 +43,8 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         let allowed = Bundle.main.resourceURL!.appendingPathComponent("ui/index.html").standardizedFileURL
-        decisionHandler(navigationAction.request.url?.standardizedFileURL == allowed ? .allow : .cancel)
+        let portrait=Bundle.main.resourceURL!.appendingPathComponent("ui/portraits.html").standardizedFileURL
+        decisionHandler([allowed,portrait].contains(navigationAction.request.url?.standardizedFileURL ?? URL(fileURLWithPath:"/")) ? .allow : .cancel)
     }
     func reply(_ id: String, value: Any? = nil, error: String? = nil) {
         var response: [String:Any] = ["id":id]
@@ -52,7 +53,7 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
         web.evaluateJavaScript("window.receiveNative(\(json))", completionHandler: nil)
     }
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.frameInfo.isMainFrame, message.frameInfo.request.url?.standardizedFileURL == Bundle.main.resourceURL!.appendingPathComponent("ui/index.html").standardizedFileURL, let body = message.body as? [String:Any], let id = body["id"] as? String, let action = body["action"] as? String else { return }
+        guard message.frameInfo.isMainFrame, ["index.html","portraits.html"].map({Bundle.main.resourceURL!.appendingPathComponent("ui/"+$0).standardizedFileURL}).contains(message.frameInfo.request.url?.standardizedFileURL ?? URL(fileURLWithPath:"/")), let body = message.body as? [String:Any], let id = body["id"] as? String, let action = body["action"] as? String else { return }
         do {
             if action == "dirty" { dirty = body["value"] as? Bool ?? false; reply(id,value:true); return }
             if action == "chooseProject" {
@@ -71,6 +72,16 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
             case "openWiki":
                 guard let raw=body["url"] as? String, let url=URL(string:raw), url.scheme == "https", ["namu.wiki","ko.wikipedia.org","ja.wikipedia.org"].contains(url.host ?? ""), url.user == nil, url.password == nil, url.port == nil else { throw EditorError.message("위키 주소를 확인해 주세요.") }
                 NSWorkspace.shared.open(url);reply(id,value:true)
+            case "switchEditor":
+                guard confirmDiscard() else { reply(id,value:false);return }
+                dirty=false;let filename=(body["kind"] as? String == "portraits") ? "portraits.html" : "index.html"
+                let resources=Bundle.main.resourceURL!.appendingPathComponent("ui",isDirectory:true);web.loadFileURL(resources.appendingPathComponent(filename),allowingReadAccessTo:resources)
+            case "loadPortraits": reply(id,value:["path":store.root.path,"entries":try store.loadPortraits()])
+            case "savePortrait":
+                guard let p=body["memory"] as? [String:Any] else { throw EditorError.message("포트레이트 자료가 없습니다.") }
+                let revision=try store.savePortrait(p,expected:body["revision"] as? String);dirty=false;reply(id,value:["revision":revision,"entries":try store.loadPortraits()])
+            case "exportPortraits":
+                guard !dirty else { throw EditorError.message("편집 중인 포트레이트를 먼저 저장해 주세요.") };reply(id,value:try store.exportPortraitMigration().path)
             case "upload":
                 let panel=NSOpenPanel();panel.allowedContentTypes=[.png,.jpeg,.webP,.heic,.tiff];panel.prompt="이미지 가져오기";panel.message="프로젝트에 복사할 이미지를 선택해 주세요."
                 guard panel.runModal() == .OK, let source=panel.url else { reply(id,value:NSNull());return }
@@ -90,6 +101,7 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
             case "prepareDeploy":
                 guard !dirty else { throw EditorError.message("편집 중인 기억을 먼저 저장해 주세요.") }
                 for entry in try store.load() { try MemoryStore.validate(entry["memory"] as! [String:Any]) }
+                for entry in try store.loadPortraits() { try MemoryStore.validatePortrait(entry["memory"] as! [String:Any]) }
                 try startOnline(action,id:id)
             case "publish":
                 guard !dirty,let plan=preparedPlan else { throw EditorError.message("서버 반영 준비를 먼저 진행해 주세요.") }

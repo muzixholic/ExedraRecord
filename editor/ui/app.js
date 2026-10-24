@@ -111,9 +111,9 @@ $('#translation-dismiss').onclick=()=>{$('#translation-dialog').close();message(
 $('#translation-apply').onclick=()=>{if(!pendingTranslation)return;const memory=model.applyTranslation(translationBase.memory,pendingTranslation.draft,pendingTranslation.sourceImage);const rev=translationBase.revision;$('#translation-dialog').close();edit({memory,revision:rev});setDirty(true);tab('skills');message('초벌 번역을 편집기에 적용했습니다. 원문·수치를 검토한 뒤 기억 저장을 눌러 주세요.');pendingTranslation=null;translationBase=null};
 $('#connections').onclick=()=>run(async()=>{message('연결 상태 확인 중');const result=await online('connections');message('Codex: '+(result.codex?'로그인됨':'로그인 필요')+' · Cloudflare: '+(result.cloudflare?'기존 계정 연결됨':'로그인 또는 계정 확인 필요'))});
 for(const [button,action]of [['#login-codex','loginCodex'],['#login-cloudflare','loginCloudflare']])$(button).onclick=()=>run(async()=>{await online(action);message('로그인을 마쳤습니다. 연결 확인으로 상태를 확인할 수 있습니다.')});
-$('#publish-prepare').onclick=()=>run(async()=>{if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');message('서버 반영 자료를 준비하는 중');const plan=await online('prepareDeploy');$('#publish-summary').textContent='저장된 기억 '+plan.count+'개와 이미지 · '+plan.url;$('#publish-dialog').showModal()});
+$('#publish-prepare').onclick=()=>run(async()=>{if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');message('서버 반영 자료를 준비하는 중');const plan=await online('prepareDeploy');$('#publish-summary').textContent='저장된 기억 '+plan.count+'개 · 포트레이트 '+(plan.portraitCount||0)+'개와 이미지 · '+plan.url;$('#publish-dialog').showModal()});
 $('#publish-dismiss').onclick=()=>{$('#publish-dialog').close();message('서버 반영을 취소했습니다.')};
-$('#publish-confirm').onclick=()=>{$('#publish-dialog').close();run(async()=>{const result=await online('publish');message('기억 '+result.count+'개와 이미지를 서버에 반영하고 조회 확인을 마쳤습니다.\n'+result.url)})};
+$('#publish-confirm').onclick=()=>{$('#publish-dialog').close();run(async()=>{const result=await online('publish');message('기억 '+result.count+'개 · 포트레이트 '+(result.portraitCount||0)+'개와 이미지를 서버에 반영하고 조회 확인을 마쳤습니다.\n'+result.url)})};
 function syncGroup(){
  const magia=field('work').value==='magia-record';$('#group-field').hidden=!magia;if(!magia)current.groups=[];
  const works=$('#work-tags');works.replaceChildren();
@@ -143,3 +143,5 @@ for(const key of ['character_ko','character_ja'])field(key).addEventListener('ch
 });
 
 if(window.desktopEditor){for(const element of document.querySelectorAll('button,p'))if(element.childElementCount===0)element.textContent=element.textContent.replaceAll('⌘S','Ctrl+S').replaceAll('이 맥','이 컴퓨터');}
+
+$('#switch-portraits').onclick=()=>run(async()=>{if(await discard())await native('switchEditor',{kind:'portraits'})});
