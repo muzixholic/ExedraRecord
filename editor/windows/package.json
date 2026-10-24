@@ -1,0 +1,52 @@
+{
+  "name": "exedra-record-editor",
+  "version": "1.2.0",
+  "description": "엑세드라 레코드 윈도 기억 입력 도구",
+  "author": "ExedraRecord",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "prepare:ui": "node prepare.mjs",
+    "start": "npm run prepare:ui && electron .",
+    "build:win": "npm run prepare:ui && electron-builder --win zip --x64 --publish never"
+  },
+  "build": {
+    "appId": "local.exedra.record.editor.windows",
+    "productName": "ExedraRecordEditor",
+    "directories": {
+      "output": "../../dist/windows"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "store.mjs",
+      "ui/**",
+      "service/**",
+      "package.json"
+    ],
+    "asar": false,
+    "win": {
+      "target": [
+        "zip"
+      ],
+      "signAndEditExecutable": false
+    },
+    "artifactName": "ExedraRecordEditor-Windows-${version}-${arch}.${ext}",
+    "extraFiles": [
+      {
+        "from": "사용안내.md",
+        "to": "사용안내.md"
+      },
+      {
+        "from": "../../LICENSE",
+        "to": "LICENSE.ExedraRecord.txt"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  }
+}

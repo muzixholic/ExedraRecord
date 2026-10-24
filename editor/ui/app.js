@@ -1,12 +1,15 @@
 const $=selector=>document.querySelector(selector);
 const model=globalThis.EditorModel;
 const requests=new Map();let requestID=0;
+const editorBridge=window.desktopEditor||window.webkit?.messageHandlers?.editor;
 window.receiveNative=response=>{const pending=requests.get(response.id);if(!pending)return;requests.delete(response.id);response.error?pending.reject(Error(response.error)):pending.resolve(response.value)};
-function native(action,data={}){return new Promise((resolve,reject)=>{const id=String(++requestID);requests.set(id,{resolve,reject});if(!window.webkit?.messageHandlers?.editor){requests.delete(id);reject(Error('맥용 기억 입력 도구 앱에서 열어 주세요.'));return}window.webkit.messageHandlers.editor.postMessage({id,action,...data})})}
+window.desktopEditor?.onResponse(response=>window.receiveNative(response));
+window.desktopEditor?.onProgress(event=>window.nativeProgress?.(event));
+function native(action,data={}){return new Promise((resolve,reject)=>{const id=String(++requestID);requests.set(id,{resolve,reject});if(!editorBridge){requests.delete(id);reject(Error('기억 입력 도구 앱에서 열어 주세요.'));return}editorBridge.postMessage({id,action,...data})})}
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e};
 let entries=[],current=null,revision=null,dirty=false,busy=false,previewVersion=0;
 function message(text,error=false){$('#message').textContent=text;$('#message').classList.toggle('error',error)}
-function setDirty(value){dirty=value;$('#save-state').textContent=value?'저장하지 않은 변경':'로컬 저장 상태';window.webkit?.messageHandlers?.editor.postMessage({id:'dirty',action:'dirty',value})}
+function setDirty(value){dirty=value;$('#save-state').textContent=value?'저장하지 않은 변경':'로컬 저장 상태';editorBridge?.postMessage({id:'dirty',action:'dirty',value})}
 function field(name){return document.querySelector('[name="'+name+'"]')}
 function change(){setDirty(true)}
 async function run(task){if(busy)return;busy=true;const controls=Array.from(document.querySelectorAll('button,input,textarea,select')).filter(e=>!e.closest('dialog')&&e.id!=='cancel-operation').map(e=>[e,e.disabled]);controls.forEach(([e])=>e.disabled=true);try{await task()}catch(error){message(error.message,true)}finally{controls.forEach(([e,disabled])=>e.disabled=disabled);busy=false}}
@@ -138,3 +141,5 @@ for(const key of ['character_ko','character_ja'])field(key).addEventListener('ch
  const shared=entries.find(({memory:k})=>ja&&normalize(k.character_ja)?ja===normalize(k.character_ja):ko&&ko===normalize(k.character_ko));
  if(shared){field('voice_actor').value=shared.memory.voice_actor||'';field('voice_actor_url').value=shared.memory.voice_actor_url||'';message('등록된 캐릭터의 공통 성우 정보를 불러왔습니다.')}
 });
+
+if(window.desktopEditor){for(const element of document.querySelectorAll('button,p'))if(element.childElementCount===0)element.textContent=element.textContent.replaceAll('⌘S','Ctrl+S').replaceAll('이 맥','이 컴퓨터');}

@@ -10,3 +10,7 @@ dist/
 data/editor-backups/
 
 .editor-jobs/
+
+# 윈도 앱의 생성된 공통 화면·작업 도구
+editor/windows/ui/
+editor/windows/service/

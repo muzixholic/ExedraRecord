@@ -1,5 +1,5 @@
 import {readFile,writeFile,mkdir,mkdtemp,cp,readdir,stat} from 'node:fs/promises';
-import {join,resolve,relative} from 'node:path';
+import {join,resolve,relative,isAbsolute} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 export const target={account:'7b33c59c1366ca82db48b21179a06bd1',database:'aa62db47-a17f-4e60-b481-d4c970c93404',name:'exedra-record',url:'https://exedra-record.chm1610.workers.dev'};
 export function validateTarget(config){if(config.account_id!==target.account||config.name!==target.name||config.d1_databases?.find(k=>k.binding==='DB')?.database_id!==target.database||config.main!=='src/worker.js'||config.assets?.directory!=='./public')throw Error('배포 대상이 기존 엑세드라 레코드와 다릅니다. 프로젝트 설정을 확인해 주세요.')}
@@ -10,7 +10,7 @@ export async function prepare(root){
  const config=JSON.parse(await readFile(join(root,'wrangler.jsonc'),'utf8'));validateTarget(config);
  const records=[];for(const file of (await readdir(join(root,'data/memories'))).filter(p=>p.endsWith('.json')).sort()){
   const memory=JSON.parse(await readFile(join(root,'data/memories',file),'utf8'));if(file!==memory.id+'.json')throw Error('기억 파일명과 식별자가 다릅니다.');
-  for(const key of ['image','illustration_url','thumbnail_url'])if(memory[key]?.startsWith('/')){const path=resolve(root,'public','.'+memory[key]);const base=resolve(root,'public/images');if(!path.startsWith(base+'/'))throw Error('이미지 경로가 올바르지 않습니다.');await stat(path)}
+  for(const key of ['image','illustration_url','thumbnail_url'])if(memory[key]?.startsWith('/')){const path=resolve(root,'public','.'+memory[key]);const base=resolve(root,'public/images');const assetRelative=relative(base,path);if(!assetRelative||assetRelative.startsWith('..')||isAbsolute(assetRelative))throw Error('이미지 경로가 올바르지 않습니다.');await stat(path)}
   records.push(memory);
  }
  if(!records.length)throw Error('반영할 기억이 없습니다.');
