@@ -97,6 +97,9 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
                 let url=try store.localAsset(path)
                 guard let image=NSImage(contentsOf:url) else { reply(id,value:NSNull());return }
                 reply(id,value:"data:image/jpeg;base64," + (try bitmap(image,maxSide:1000,type:.jpeg)).base64EncodedString())
+            case "listCorrections", "completeCorrection": try startOnline(action,id:id,payload:["status":body["status"] as? String ?? "pending","offset":body["offset"] as? Int ?? 0,"requestID":body["requestID"] as? String ?? ""])
+            case "openCorrectionPage":
+                guard let kind=body["kind"] as? String,["memories","portraits"].contains(kind),let record=body["recordID"] as? String,record.range(of:"^[a-z0-9]+(-[a-z0-9]+)*$",options:.regularExpression) != nil,let url=URL(string:"https://exedra-record.chm1610.workers.dev/#"+kind+"/"+record) else { throw EditorError.message("페이지 주소를 확인해 주세요.") };NSWorkspace.shared.open(url);reply(id,value:true)
             case "connections", "loginCodex", "loginCloudflare": try startOnline(action,id:id)
             case "prepareDeploy":
                 guard !dirty else { throw EditorError.message("편집 중인 기억을 먼저 저장해 주세요.") }

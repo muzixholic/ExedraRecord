@@ -5,6 +5,7 @@ import {join,resolve,dirname,delimiter,basename,relative,isAbsolute} from 'node:
 import {pathToFileURL} from 'node:url';
 import {prepare,publish} from './deployment.mjs';
 import {translate} from './translation.mjs';
+import {correctionJob} from './corrections.mjs';
 import {translatePortrait} from './portrait-translation.mjs';
 const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
 const progress=message=>send({event:'progress',message});
@@ -16,7 +17,7 @@ export function executableCandidates(name,platform=process.platform){return plat
 export async function commandPath(name){for(const directory of [...(process.env.PATH||process.env.Path||'').split(delimiter),...(process.platform==='win32'?[process.env.APPDATA&&join(process.env.APPDATA,'npm')].filter(Boolean):['/opt/homebrew/bin','/usr/local/bin','/usr/bin'])].filter(Boolean)){for(const candidate of executableCandidates(name)){const path=join(directory,candidate);try{await access(path,constants.X_OK);return path}catch{}}}throw Error(name+' 실행 파일이 없습니다. 설치와 로그인 상태를 확인해 주세요.')}
 function killTree(pid){if(process.platform==='win32'){spawn(join(process.env.SystemRoot||'C:\\Windows','System32','taskkill.exe'),['/pid',String(pid),'/T','/F'],{windowsHide:true,stdio:'ignore'})}else{try{process.kill(-pid,'SIGTERM')}catch{}}}
 
-export async function run(executable,args,{cwd,input,timeout=120_000}={}){
+export async function run(executable,args,{cwd,input,timeout=120_000,outputLimit=12000}={}){
  if(process.platform==='win32'&&/\.cmd$/i.test(executable)){
   if(basename(executable).toLowerCase()!=='codex.cmd')throw Error('지원하지 않는 실행 파일 형식입니다.');
   const script=join(dirname(executable),'node_modules','@openai','codex','bin','codex.js');
@@ -28,13 +29,14 @@ export async function run(executable,args,{cwd,input,timeout=120_000}={}){
  return new Promise((resolve,reject)=>{
   let output='',timedOut=false;const processChild=spawn(executable,args,{cwd,detached:process.platform!=='win32',windowsHide:true,env:{...process.env,CI:'true',NO_COLOR:'1',WRANGLER_SEND_METRICS:'false',PATH:[dirname(process.execPath),'/opt/homebrew/bin','/usr/local/bin',process.env.PATH||''].join(delimiter)},stdio:['pipe','pipe','pipe']});child=processChild;
   const timer=setTimeout(()=>{timedOut=true;killTree(processChild.pid)},timeout);
-  const append=data=>{output=(output+data.toString()).slice(-12000)};processChild.stdout.on('data',append);processChild.stderr.on('data',append);processChild.stdin.on('error',()=>{});processChild.stdin.end(input||'');
+  const append=data=>{output=(output+data.toString()).slice(-outputLimit)};processChild.stdout.on('data',append);processChild.stderr.on('data',append);processChild.stdin.on('error',()=>{});processChild.stdin.end(input||'');
   processChild.once('error',error=>{clearTimeout(timer);reject(Error('실행하지 못했습니다: '+error.message))});
   processChild.once('close',code=>{clearTimeout(timer);if(child===processChild)child=null;if(cancelled)reject(Error('작업이 취소되었습니다.'));else if(timedOut)reject(Error('작업 시간이 초과되었습니다. 다시 시도해 주세요.'));else if(code!==0)reject(Error(redact(output).slice(-1800)||'실행 실패'));else resolve(output)});
  });
 }
 export async function execute(job){
  const root=resolve(job.root);const node=process.execPath;const wrangler=join(root,'node_modules/wrangler/bin/wrangler.js');
+ if(['listCorrections','completeCorrection'].includes(job.action))return correctionJob(root,job.action,job,{run,node,wrangler,progress});
  if(job.action==='translatePortrait')return {...await translatePortrait({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='translate')return {...await translate({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='prepareDeploy'){progress('로컬 기억과 이미지를 고정해 반영 자료를 준비하는 중');return await prepare(root)}

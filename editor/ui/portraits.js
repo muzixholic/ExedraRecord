@@ -52,3 +52,5 @@ $('#translate-current').onclick=()=>run(async()=>{const base={memory:collectDraf
 function dismissTranslation(){if($('#translation-dialog').open)$('#translation-dialog').close();pendingTranslation=null;translationBase=null;message('초벌 입력 적용을 취소했습니다. 기존 자료는 유지됩니다.')}
 $('#translation-dismiss').onclick=dismissTranslation;$('#translation-dialog').oncancel=dismissTranslation;
 $('#translation-apply').onclick=()=>{if(!pendingTranslation)return;const appliedLevel=pendingTranslation.draft.displayed_enhancement;const memory=model.applyTranslation(translationBase.memory,pendingTranslation.draft,pendingTranslation.sourceImage,{isNew:translationBase.isNew});const rev=translationBase.revision;$('#translation-dialog').close();pendingTranslation=null;translationBase=null;edit({memory,revision:rev});if(appliedLevel!==null){level=appliedLevel;renderEffects()}setDirty(true);message('초벌 입력을 편집기에 적용했습니다. 입수처와 판독 결과를 확인한 뒤 저장해 주세요.')};
+
+installCorrections({native,run});

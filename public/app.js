@@ -1,4 +1,5 @@
 import './affiliations.js';
+import {correctionButton} from './corrections.js';
 import {renderPortraits} from './portraits.js';
 const affiliations=globalThis.ExedraAffiliations;
 import {relatedMemories,voiceActorLabel,characterVoice,voiceActorUrl} from './character.js';
@@ -56,6 +57,7 @@ function detail(k){
  if(k.limit_breaks?.length){d.append(node('h3','한계돌파'));const breaks=node('div',undefined,'skills');for(const b of k.limit_breaks)breaks.append(translatedBlock('한계돌파',b.stage+'단계',b.ja,b.ko));d.append(breaks)}
  if(k.pending?.length){const pending=node('section',undefined,'pending');pending.append(node('h3','추가 전사 예정'));const ul=node('ul');k.pending.forEach(s=>ul.append(node('li',s)));pending.append(ul);d.append(pending)}
  d.append(node('h3','출처 이미지'),node('p',k.source_note,'note'));const img=node('img');img.src=k.image;img.alt=k.character_ko+' 공식 기억 소개 원본. 일본어 스킬 설명과 한계돌파 효과 포함.';img.className='source';img.loading='lazy';img.width=1920;img.height=1080;d.append(img);
+ d.append(correctionButton('memories',k));
 }
 let listError=false;
 let ready=false;

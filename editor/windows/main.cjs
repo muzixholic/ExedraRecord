@@ -45,6 +45,8 @@ async function handle(body){
   if(action==='openWiki'){const u=new URL(body.url);if(u.protocol!=='https:'||u.username||u.password||u.port||!['namu.wiki','ko.wikipedia.org','ja.wikipedia.org'].includes(u.hostname))throw Error('위키 주소를 확인해 주세요.');await shell.openExternal(u.href);return true}
   if(action==='upload'){const source=await pickImage();return source?await importImage(source):null}
   if(action==='preview'){if(!body.path)return null;const image=nativeImage.createFromPath(await store.localAsset(body.path));return image.isEmpty()?null:'data:image/jpeg;base64,'+resized(image,1000).toJPEG(85).toString('base64')}
+  if(['listCorrections','completeCorrection'].includes(action))return await online(action,{status:body.status,offset:body.offset,requestID:body.requestID});
+  if(action==='openCorrectionPage'){if(!['memories','portraits'].includes(body.kind)||typeof body.recordID!=='string'||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.recordID))throw Error('페이지 주소를 확인해 주세요.');await shell.openExternal('https://exedra-record.chm1610.workers.dev/#'+body.kind+'/'+body.recordID);return true}
   if(['connections','loginCodex','loginCloudflare'].includes(action))return await online(action);
   if(['translate','translatePortrait'].includes(action)){let image=body.image;if(!image){const source=await pickImage();if(!source)return null;image=(await importImage(source)).image}return await online(action,{image:await store.localAsset(image),sourceImage:image})}
   if(action==='export'){if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');return await store.exportMigration()}

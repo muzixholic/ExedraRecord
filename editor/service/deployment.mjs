@@ -5,7 +5,19 @@ import './portrait-model.js';
 async function optionalJson(path,fallback){try{return JSON.parse(await readFile(path,'utf8'))}catch(error){if(error.code==='ENOENT')return fallback;throw error}}
 export const target={account:'7b33c59c1366ca82db48b21179a06bd1',database:'aa62db47-a17f-4e60-b481-d4c970c93404',name:'exedra-record',url:'https://exedra-record.chm1610.workers.dev'};
 export function validateTarget(config){if(config.account_id!==target.account||config.name!==target.name||config.d1_databases?.find(k=>k.binding==='DB')?.database_id!==target.database||config.main!=='src/worker.js'||config.assets?.directory!=='./public')throw Error('배포 대상이 기존 엑세드라 레코드와 다릅니다. 프로젝트 설정을 확인해 주세요.')}
-export function sqlFor(memories,portraits=[]){const statements=['CREATE TABLE IF NOT EXISTS portraits (id TEXT PRIMARY KEY, payload TEXT NOT NULL, published INTEGER NOT NULL DEFAULT 1);'];for(const [table,records]of [['memories',memories],['portraits',portraits]])for(const memory of records){if(typeof memory.id!=='string'||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(memory.id))throw Error('자료 식별자 형식 오류');if(table==='portraits')globalThis.PortraitModel.validate(memory);statements.push("INSERT INTO "+table+"(id,payload,published) VALUES ('"+memory.id+"','"+JSON.stringify(memory).replaceAll("'","''")+"',1) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,published=excluded.published;")}return statements.join('\n')+'\n'}
+export function sqlFor(memories,portraits=[]){const statements=[`CREATE TABLE IF NOT EXISTS correction_requests (
+ id TEXT PRIMARY KEY,
+ created_at TEXT NOT NULL,
+ kind TEXT NOT NULL CHECK(kind IN ('memories','portraits')),
+ record_id TEXT NOT NULL,
+ page_title TEXT NOT NULL,
+ content TEXT NOT NULL,
+ completed_at TEXT,
+ client_hash TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS correction_requests_created ON correction_requests(created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS correction_requests_client ON correction_requests(client_hash, created_at);
+`,'CREATE TABLE IF NOT EXISTS portraits (id TEXT PRIMARY KEY, payload TEXT NOT NULL, published INTEGER NOT NULL DEFAULT 1);'];for(const [table,records]of [['memories',memories],['portraits',portraits]])for(const memory of records){if(typeof memory.id!=='string'||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(memory.id))throw Error('자료 식별자 형식 오류');if(table==='portraits')globalThis.PortraitModel.validate(memory);statements.push("INSERT INTO "+table+"(id,payload,published) VALUES ('"+memory.id+"','"+JSON.stringify(memory).replaceAll("'","''")+"',1) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,published=excluded.published;")}return statements.join('\n')+'\n'}
 async function walk(root,directory=root){const items=[];for(const entry of await readdir(directory,{withFileTypes:true})){const path=join(directory,entry.name);if(entry.isSymbolicLink())throw Error('배포 파일에 심볼릭 링크가 있습니다: '+relative(root,path));if(entry.isDirectory())items.push(...await walk(root,path));else if(entry.isFile())items.push(path)}return items.sort()}
 export async function snapshotHash(root){const files=[join(root,'wrangler.jsonc'),join(root,'memories.sql'),join(root,'records.json'),...await walk(join(root,'src')),...await walk(join(root,'public'))];try{await stat(join(root,'portraits.json'));files.push(join(root,'portraits.json'))}catch(error){if(error.code!=='ENOENT')throw error}const hash=createHash('sha256');for(const file of files)hash.update(relative(root,file)).update(await readFile(file));return hash.digest('hex')}
 export async function prepare(root){

@@ -145,3 +145,5 @@ for(const key of ['character_ko','character_ja'])field(key).addEventListener('ch
 if(window.desktopEditor){for(const element of document.querySelectorAll('button,p'))if(element.childElementCount===0)element.textContent=element.textContent.replaceAll('⌘S','Ctrl+S').replaceAll('이 맥','이 컴퓨터');}
 
 $('#switch-portraits').onclick=()=>run(async()=>{if(await discard())await native('switchEditor',{kind:'portraits'})});
+
+installCorrections({native,run});
