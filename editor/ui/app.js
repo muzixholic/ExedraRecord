@@ -136,5 +136,5 @@ for(const key of ['character_ko','character_ja'])field(key).addEventListener('ch
  const normalize=value=>(value||'').normalize('NFKC').replace(/\s+/gu,'').toLowerCase();
  const ja=normalize(field('character_ja').value),ko=normalize(field('character_ko').value);
  const shared=entries.find(({memory:k})=>ja&&normalize(k.character_ja)?ja===normalize(k.character_ja):ko&&ko===normalize(k.character_ko));
- if(shared){field('voice_actor').value=shared.memory.voice_actor||'';field('voice_actor_url').value=shared.memory.voice_actor_url||'';message('등록된 캐릭터의 공통 성우 정보를 불러왔습니다.')} 
+ if(shared){field('voice_actor').value=shared.memory.voice_actor||'';field('voice_actor_url').value=shared.memory.voice_actor_url||'';message('등록된 캐릭터의 공통 성우 정보를 불러왔습니다.')}
 });
