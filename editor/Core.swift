@@ -35,10 +35,24 @@ struct MemoryStore {
     static func characterName(_ value: Any?) -> String {
         (value as? String ?? "").precomposedStringWithCompatibilityMapping.components(separatedBy:.whitespacesAndNewlines).joined().lowercased()
     }
+    static func characterGroup(_ memory:[String:Any]) -> String {
+        if let explicit=memory["character_group"] as? String,!explicit.isEmpty { return explicit }
+        let names=[characterName(memory["character_ja"]),characterName(memory["character_ko"])].filter{!$0.isEmpty}
+        for (id,aliases) in [("akemi-homura",["아케미 호무라","暁美ほむら","악마 호무라","悪魔ほむら"]),("kaname-madoka",["카나메 마도카","鹿目まどか","얼티밋 마도카","アルティメットまどか"])] { if aliases.contains(where:{names.contains(characterName($0))}) { return id } }
+        let ja=characterName(memory["character_ja"]),ko=characterName(memory["character_ko"])
+        return !ja.isEmpty ? "ja:"+ja : !ko.isEmpty ? "ko:"+ko : ""
+    }
     static func sameCharacter(_ a:[String:Any],_ b:[String:Any]) -> Bool {
-        let ja=characterName(a["character_ja"]), jb=characterName(b["character_ja"])
+        let ga=characterGroup(a),gb=characterGroup(b)
+        if !ga.isEmpty && ga == gb { return true }
+        if !(a["character_group"] as? String ?? "").isEmpty || !(b["character_group"] as? String ?? "").isEmpty { return false }
+        let ja=characterName(a["character_ja"]),jb=characterName(b["character_ja"])
         if !ja.isEmpty && !jb.isEmpty { return ja == jb }
         let ko=characterName(a["character_ko"]);return !ko.isEmpty && ko == characterName(b["character_ko"])
+    }
+    static func sharedCharacter(_ memory:[String:Any],_ characters:[[String:Any]]) -> [String:Any]? {
+        let matches=characters.filter{($0["voice_actor_override"] as? Bool != true) && sameCharacter(memory,$0)}
+        return matches.first(where:{!($0["character_group"] as? String ?? "").isEmpty}) ?? matches.first
     }
     func entryRevision(_ data:Data) throws -> String {
         Self.revision(data + (fm.fileExists(atPath:charactersFile.path) ? try Data(contentsOf:charactersFile) : Data()))
@@ -48,7 +62,7 @@ struct MemoryStore {
             let data = try Data(contentsOf: url)
             guard var memory = try JSONSerialization.jsonObject(with: data) as? [String: Any], let id = memory["id"] as? String, id + ".json" == url.lastPathComponent else { throw EditorError.message("자료 형식을 확인해 주세요: \(url.lastPathComponent)") }
             _ = try file(id)
-            if let shared=try characters().first(where:{Self.sameCharacter(memory,$0)}) {
+            if memory["voice_actor_override"] as? Bool != true,let shared=Self.sharedCharacter(memory,try characters()) {
                 memory["voice_actor"]=shared["voice_actor"] ?? "";memory["voice_actor_url"]=shared["voice_actor_url"] ?? ""
             }
             return ["memory": memory, "revision": try entryRevision(data)]
@@ -60,6 +74,10 @@ struct MemoryStore {
             guard let value = memory[key] as? String, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw EditorError.message("캐릭터명과 기억 이름은 필수입니다.") }
         }
         guard [3,4,5].contains(memory["rarity"] as? Int ?? 0), ["불속성","물속성","나무속성","빛속성","어둠속성","무속성"].contains(memory["element"] as? String ?? ""), ["어태커","브레이커","힐러","버퍼","디버퍼","디펜더"].contains(memory["role"] as? String ?? ""), ["한정","통상","배포"].contains(memory["acquisition"] as? String ?? "") else { throw EditorError.message("희귀도·속성·역할·입수 구분을 확인해 주세요.") }
+        if let group=memory["character_group"],!(group is NSNull) {
+            guard let value=group as? String,value.count<=200,value.unicodeScalars.allSatisfy({!CharacterSet.whitespacesAndNewlines.contains($0) && !CharacterSet.controlCharacters.contains($0)}) else { throw EditorError.message("캐릭터 그룹을 확인해 주세요.") }
+        }
+        if let value=memory["voice_actor_override"],!(value is NSNull) { guard let number=value as? NSNumber,CFGetTypeID(number)==CFBooleanGetTypeID() else { throw EditorError.message("성우 개별 지정 여부를 확인해 주세요.") } }
         if let actor=memory["voice_actor"], !(actor is NSNull), !(actor is String) { throw EditorError.message("성우는 이름으로 입력해 주세요.") }
         if let raw=memory["voice_actor_url"], !(raw is NSNull) {
             guard let link=raw as? String else { throw EditorError.message("성우 문서 주소를 입력해 주세요.") }
@@ -105,10 +123,11 @@ struct MemoryStore {
         let previousCharacters=try? Data(contentsOf:charactersFile)
         do {
         try data.write(to: target, options: .atomic)
-        if memory["voice_actor"] != nil || memory["voice_actor_url"] != nil {
+        if memory["voice_actor_override"] as? Bool != true && (memory["voice_actor"] != nil || memory["voice_actor_url"] != nil) {
             var shared=try characters()
-            let actor:[String:Any] = ["character_ko":memory["character_ko"] ?? "","character_ja":memory["character_ja"] ?? "","voice_actor":memory["voice_actor"] ?? "","voice_actor_url":memory["voice_actor_url"] ?? ""]
-            if let index=shared.firstIndex(where:{Self.sameCharacter(memory,$0)}) { shared[index]=actor } else { shared.append(actor) }
+            let existing=Self.sharedCharacter(memory,shared)
+            let actor:[String:Any] = ["character_ko":existing?["character_ko"] ?? memory["character_ko"] ?? "","character_ja":existing?["character_ja"] ?? memory["character_ja"] ?? "","character_group":Self.characterGroup(memory),"voice_actor":memory["voice_actor"] ?? "","voice_actor_url":memory["voice_actor_url"] ?? ""]
+            if let existing,let index=shared.firstIndex(where:{NSDictionary(dictionary:$0).isEqual(to:existing)}) { shared[index]=actor } else { shared.append(actor) }
             if fm.fileExists(atPath:charactersFile.path) {
                 let backup=root.appendingPathComponent("data/editor-backups/characters",isDirectory:true)
                 try fm.createDirectory(at:backup,withIntermediateDirectories:true)

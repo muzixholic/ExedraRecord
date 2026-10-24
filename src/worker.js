@@ -1,7 +1,7 @@
 import {submitCorrection} from './corrections.js';
 const summarySql = `SELECT json_object(
  'id',id,'character_ko',json_extract(payload,'$.character_ko'),
- 'character_ja',json_extract(payload,'$.character_ja'),'name_ko',json_extract(payload,'$.name_ko'),
+ 'character_ja',json_extract(payload,'$.character_ja'),'character_group',json_extract(payload,'$.character_group'),'name_ko',json_extract(payload,'$.name_ko'),
  'name_ja',json_extract(payload,'$.name_ja'),'rarity',json_extract(payload,'$.rarity'),
  'role',json_extract(payload,'$.role'),'element',json_extract(payload,'$.element'),
  'illustration_url',json_extract(payload,'$.illustration_url'),

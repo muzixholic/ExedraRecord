@@ -27,3 +27,14 @@ test('윈도 저장소는 이미지 심볼릭 링크를 통한 외부 접근을 
 test('윈도 포트레이트 저장은 기억·공통 성우와 분리하고 이름·복수 효과·백업을 보존한다',()=>fixture(async(store,root)=>{
  const {PortraitStore}=await import('../editor/windows/store.mjs'),portraits=new PortraitStore(root),p=globalThis.PortraitModel.blank('test-portrait');p.name_ko='이름+5';p.name_ja='名前+5';p.stats_max={HP:100,공격력:20,방어력:30};p.ability_levels[0].effects=[{text_ko:'공격력 +5%',text_ja:'',condition_ko:'특정 캐릭터',condition_ja:'',tags:['공격력']}];await store.save(memory(),null);const commonBefore=await readFile(join(root,'public/characters.json'),'utf8');const revision=await portraits.save(p,null);p.name_ko='수정+5';await portraits.save(p,revision);await assert.rejects(portraits.save(p,revision),/변경/);const loaded=(await portraits.load())[0];assert.equal(loaded.memory.name_ko,'수정');assert.equal(loaded.memory.ability_levels[0].effects[0].condition_ko,'특정 캐릭터');assert.equal(await readFile(join(root,'public/characters.json'),'utf8'),commonBefore);assert.match(await readFile(await portraits.exportMigration(),'utf8'),/INSERT INTO portraits/);
 }));
+
+test('윈도 저장소는 바리에이션 그룹 성우 변경과 개별 성우를 분리하고 기본 표시명을 보존한다',()=>fixture(async(store,root)=>{
+ const base={...memory('homura-base'),character_ko:'아케미 호무라',character_ja:'暁美ほむら',character_group:'akemi-homura'};await store.save(base,null);
+ const devil={...memory('homura-devil'),character_ko:'악마 호무라',character_ja:'悪魔ほむら',character_group:'akemi-homura',voice_actor:'개별 성우',voice_actor_override:true};await store.save(devil,null);
+ let entries=await store.load();assert.equal(entries.find(k=>k.memory.id===devil.id).memory.voice_actor,'개별 성우');assert.equal(entries.find(k=>k.memory.id===base.id).memory.voice_actor,'확인 성우');
+ const shared=entries.find(k=>k.memory.id===base.id);shared.memory.voice_actor='그룹 수정';await store.save(shared.memory,shared.revision);
+ entries=await store.load();assert.equal(entries.find(k=>k.memory.id===devil.id).memory.voice_actor,'개별 성우');
+ const variant=entries.find(k=>k.memory.id===devil.id);variant.memory.voice_actor_override=false;variant.memory.voice_actor='그룹 재수정';await store.save(variant.memory,variant.revision);
+ entries=await store.load();assert.ok(entries.every(k=>k.memory.voice_actor==='그룹 재수정'));assert.equal(entries.find(k=>k.memory.id===devil.id).memory.character_ko,'악마 호무라');
+ const common=JSON.parse(await readFile(join(root,'public/characters.json'),'utf8'));assert.equal(common.length,1);assert.equal(common[0].character_ko,'아케미 호무라');assert.equal(common[0].character_group,'akemi-homura');
+}));

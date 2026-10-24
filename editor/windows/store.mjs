@@ -1,6 +1,7 @@
 import {readFile,writeFile,readdir,mkdir,stat,realpath,rename,rm} from 'node:fs/promises';
 import {join,resolve,relative,isAbsolute,dirname} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
+import './ui/character-groups.js';
 import './ui/model.js';
 import './ui/affiliations.js';
 import './service/portrait-model.js';
@@ -8,7 +9,7 @@ const model=globalThis.EditorModel,affiliations=globalThis.ExedraAffiliations;
 const hash=data=>createHash('sha256').update(data).digest('hex');
 const encode=value=>Buffer.from(JSON.stringify(value,null,2)+'\n');
 const normalized=value=>typeof value==='string'?value.normalize('NFKC').replace(/\s+/gu,'').toLowerCase():'';
-export function sameCharacter(a,b){const ja=normalized(a.character_ja),jb=normalized(b.character_ja);return ja&&jb?ja===jb:Boolean(normalized(a.character_ko)&&normalized(a.character_ko)===normalized(b.character_ko))}
+export const sameCharacter=(a,b)=>globalThis.ExedraCharacters.sameCharacter(a,b);
 export function validate(memory){
  model.validate(memory);
  if(!Array.isArray(memory.skills)||!Array.isArray(memory.limit_breaks)||[...memory.skills,...memory.limit_breaks].some(k=>!k||typeof k!=='object'||Array.isArray(k)))throw Error('스킬과 한계돌파 자료 형식을 확인해 주세요.');
@@ -31,12 +32,12 @@ export class MemoryStore{
  async file(id){if(typeof id!=='string'||id.length>100||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id))throw Error('식별자 형식을 확인해 주세요.');return this.safe(join(this.root,'data',this.recordFolder,id+'.json'),join(this.root,'data',this.recordFolder))}
  async common(){await this.safe(this.charactersFile);const data=await optional(this.charactersFile);const list=data?JSON.parse(data):[];if(!Array.isArray(list)||list.some(k=>!k||typeof k!=='object'||Array.isArray(k)))throw Error('캐릭터 공통 자료 형식을 확인해 주세요.');return {data,list}}
  async load(){const common=await this.common(),entries=[];for(const name of (await readdir(join(this.root,'data',this.recordFolder))).filter(v=>v.endsWith('.json')).sort()){
-  const path=await this.file(name.slice(0,-5)),data=await readFile(path),memory=JSON.parse(data);if(memory.id+'.json'!==name)throw Error('기억 파일명과 식별자가 다릅니다.');const shared=common.list.find(k=>sameCharacter(k,memory));if(shared){memory.voice_actor=shared.voice_actor||'';memory.voice_actor_url=shared.voice_actor_url||''}entries.push({memory,revision:hash(Buffer.concat([data,common.data||Buffer.alloc(0)]))});
+  const path=await this.file(name.slice(0,-5)),data=await readFile(path),memory=JSON.parse(data);if(memory.id+'.json'!==name)throw Error('기억 파일명과 식별자가 다릅니다.');const shared=!memory.voice_actor_override&&ExedraCharacters.shared(memory,common.list);if(shared){memory.voice_actor=shared.voice_actor||'';memory.voice_actor_url=shared.voice_actor_url||''}entries.push({memory,revision:hash(Buffer.concat([data,common.data||Buffer.alloc(0)]))});
  }return entries}
  async backup(name,data){if(!data)return;const dir=join(this.root,'data/editor-backups',...(this.table==='portraits'?['portraits',name]:[name]));await mkdir(dir,{recursive:true});await this.safe(dir);await writeFile(join(dir,randomUUID()+'.json'),data,{flag:'wx'})}
  validate(memory){return validate(memory)}
  async save(memory,expected){this.validate(memory);const path=await this.file(memory.id),previous=await optional(path),common=await this.common();if(previous){if(!expected||expected!==hash(Buffer.concat([previous,common.data||Buffer.alloc(0)])))throw Error('다른 곳에서 변경된 자료이거나 같은 식별자가 있습니다. 다시 불러온 뒤 수정해 주세요.')}else if(expected)throw Error('원본 파일이 사라졌습니다. 다시 불러와 주세요.');await this.backup(memory.id,previous);
-  let shared=common.data;if(this.table==='memories'&&('voice_actor'in memory||'voice_actor_url'in memory)){const value={character_ko:memory.character_ko,character_ja:memory.character_ja||'',voice_actor:memory.voice_actor||'',voice_actor_url:memory.voice_actor_url||''};const i=common.list.findIndex(k=>sameCharacter(k,memory));if(i<0)common.list.push(value);else common.list[i]=value;shared=encode(common.list);await this.backup('characters',common.data)}
+  let shared=common.data;if(this.table==='memories'&&!memory.voice_actor_override&&('voice_actor'in memory||'voice_actor_url'in memory)){const found=ExedraCharacters.shared(memory,common.list),i=found?common.list.indexOf(found):-1;const value={character_ko:found?.character_ko||memory.character_ko,character_ja:found?.character_ja||memory.character_ja||'',character_group:ExedraCharacters.key(memory),voice_actor:memory.voice_actor||'',voice_actor_url:memory.voice_actor_url||''};if(i<0)common.list.push(value);else common.list[i]=value;shared=encode(common.list);await this.backup('characters',common.data)}
   const data=encode(memory);try{await atomic(path,data);if(shared)await atomic(this.charactersFile,shared)}catch(error){if(previous)await atomic(path,previous);else await rm(path,{force:true});if(this.table==='memories'){if(common.data)await atomic(this.charactersFile,common.data);else await rm(this.charactersFile,{force:true})}throw error}
   return hash(Buffer.concat([data,shared||Buffer.alloc(0)]));
  }

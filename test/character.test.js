@@ -19,3 +19,25 @@ test('성우 문서 링크는 허용된 위키의 HTTPS 문서만 연결한다',
  for(const url of ['https://namu.wiki/w/성우','https://ko.wikipedia.org/wiki/성우','https://ja.wikipedia.org/wiki/声優'])assert.ok(voiceActorUrl(url));
  for(const url of ['javascript:alert(1)','https://namu.wiki.evil.test/w/test','https://evil.test/wiki/test','https://user@namu.wiki/w/test','http://namu.wiki/w/test','https://ko.wikipedia.org/','https://namu.wiki/w/'])assert.equal(voiceActorUrl(url),null);
 });
+
+test('표시 이름이 다른 두 바리에이션은 기본 캐릭터 그룹에 연결된다',()=>{
+ const homura={id:'base',character_ko:'아케미 호무라',character_ja:'暁美ほむら',rarity:5},devil={id:'devil',character_ko:'악마 호무라',character_ja:'悪魔ほむら',rarity:5};
+ assert.equal(sameCharacter(homura,devil),true);assert.equal(relatedMemories(homura,[homura,devil])[0].character_ko,'악마 호무라');
+ assert.equal(sameCharacter({character_ja:'鹿目まどか'},{character_ko:'얼티밋 마도카',character_ja:'アルティメットまどか'}),true);
+ assert.equal(sameCharacter(homura,{character_ja:'鹿目まどか'}),false);
+});
+test('직접 지정한 그룹은 이름이 달라도 연결하고 서로 다른 명시 그룹은 분리한다',()=>{
+ assert.equal(sameCharacter({character_ja:'原名',character_group:'custom-one'},{character_ja:'別名',character_group:'custom-one'}),true);
+ assert.equal(sameCharacter({character_ja:'同名',character_group:'one'},{character_ja:'同名',character_group:'two'}),false);
+ const labels=ExedraCharacters.choices([{character_ja:'別名',character_ko:'바리에이션',character_group:'ja:原名'},{character_ja:'原名',character_ko:'기본 캐릭터'}]);assert.equal(labels.find(k=>k.id==='ja:原名').label,'기본 캐릭터');
+});
+test('바리에이션은 그룹 공통 성우를 쓰고 개별 성우 지정은 그대로 보존한다',()=>{
+ const common=[{character_ja:'暁美ほむら',voice_actor:'그룹 성우',voice_actor_url:'https://namu.wiki/w/성우'}];
+ const devil={character_ja:'悪魔ほむら',voice_actor:'개별 성우',voice_actor_url:'https://ja.wikipedia.org/wiki/声優'};
+ assert.equal(characterVoice(devil,common).voice_actor,'그룹 성우');assert.deepEqual(characterVoice({...devil,voice_actor_override:true},common),{...devil,voice_actor_override:true});
+ assert.equal(EditorModel.findVoice(devil,common).voice_actor,'그룹 성우');
+});
+test('그룹 규칙 사본과 입력 검증은 웹과 입력툴에서 동일하다',async()=>{
+ const {readFile}=await import('node:fs/promises');assert.equal(await readFile(new URL('../public/character-groups.js',import.meta.url),'utf8'),await readFile(new URL('../editor/ui/character-groups.js',import.meta.url),'utf8'));
+ assert.throws(()=>ExedraCharacters.validate({character_group:{}}));assert.throws(()=>ExedraCharacters.validate({character_group:'bad group'}));assert.throws(()=>ExedraCharacters.validate({voice_actor_override:'false'}));
+});

@@ -67,6 +67,23 @@ struct CoreTests {
   acquiredPortrait["acquisition_type"]="story";acquiredPortrait["story_id"]="main-story-one";try MemoryStore.validatePortrait(acquiredPortrait)
   acquiredPortrait["acquisition_type"]="distribution";mustFail { try MemoryStore.validatePortrait(acquiredPortrait) }
   acquiredPortrait["acquisition_type"]="unknown";acquiredPortrait["story_id"]="";mustFail { try MemoryStore.validatePortrait(acquiredPortrait) }
+  var homura=memory;homura["id"]="homura-base";homura["character_ko"]="아케미 호무라";homura["character_ja"]="暁美ほむら";homura["character_group"]="akemi-homura";homura["voice_actor"]="그룹 성우"
+  _=try store.save(homura,expected:nil)
+  var devil=homura;devil["id"]="homura-devil";devil["character_ko"]="악마 호무라";devil["character_ja"]="悪魔ほむら";devil["voice_actor"]="개별 성우";devil["voice_actor_override"]=true
+  _=try store.save(devil,expected:nil)
+  precondition(MemoryStore.sameCharacter(homura,devil))
+  precondition(MemoryStore.sameCharacter(["character_ja":"鹿目まどか"],["character_ja":"アルティメットまどか"]))
+  var groupEntries=try store.load();var baseEntry=groupEntries.first{($0["memory"] as? [String:Any])?["id"] as? String == "homura-base"}!
+  homura["voice_actor"]="그룹 변경";_=try store.save(homura,expected:baseEntry["revision"] as? String)
+  groupEntries=try store.load();let devilEntry=groupEntries.first{($0["memory"] as? [String:Any])?["id"] as? String == "homura-devil"}!
+  precondition((devilEntry["memory"] as? [String:Any])?["voice_actor"] as? String == "개별 성우")
+  devil["voice_actor_override"]=false;devil["voice_actor"]="그룹 재변경";_=try store.save(devil,expected:devilEntry["revision"] as? String)
+  baseEntry=try store.load().first{($0["memory"] as? [String:Any])?["id"] as? String == "homura-base"}!
+  precondition((baseEntry["memory"] as? [String:Any])?["voice_actor"] as? String == "그룹 재변경")
+  let groupCommon=try store.characters().first{$0["character_group"] as? String == "akemi-homura"}!
+  precondition(groupCommon["character_ko"] as? String == "아케미 호무라")
+  bad=memory;bad["character_group"]="bad group";mustFail{try MemoryStore.validate(bad)}
+  bad=memory;bad["voice_actor_override"]="false";mustFail{try MemoryStore.validate(bad)}
   print("로컬 저장·수정·백업·충돌 방지·자료 보존·주소 검증·배포 파일 검증 통과")
  }
 }

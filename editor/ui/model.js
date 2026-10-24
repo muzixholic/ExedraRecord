@@ -2,9 +2,10 @@
  const elements=['불속성','물속성','나무속성','빛속성','어둠속성','무속성'];
  const roles=['어태커','브레이커','힐러','버퍼','디버퍼','디펜더'];
  const clone=value=>JSON.parse(JSON.stringify(value));
- function blank(id){return {id,character_ko:'',character_ja:'',voice_actor:'',voice_actor_url:'',work:'',groups:[],name_ko:'',name_ja:'',rarity:5,element:'불속성',role:'어태커',acquisition:'통상',limited:false,stats:{HP:'',공격력:'',방어력:'',스피드:''},stats_note:'',image:'',illustration_url:'',thumbnail_url:'',pv_url:'',source_url:'',source_note:'',verification:'입력 중 · 검토 대기',translation_notes:[],pending:[],skills:[],limit_breaks:Array.from({length:5},(_,i)=>({stage:i+1,ja:'',ko:''}))}}
+ function blank(id){return {id,character_ko:'',character_ja:'',voice_actor:'',voice_actor_url:'',character_group:'',voice_actor_override:false,work:'',groups:[],name_ko:'',name_ja:'',rarity:5,element:'불속성',role:'어태커',acquisition:'통상',limited:false,stats:{HP:'',공격력:'',방어력:'',스피드:''},stats_note:'',image:'',illustration_url:'',thumbnail_url:'',pv_url:'',source_url:'',source_note:'',verification:'입력 중 · 검토 대기',translation_notes:[],pending:[],skills:[],limit_breaks:Array.from({length:5},(_,i)=>({stage:i+1,ja:'',ko:''}))}}
  function numeric(value,label,optional=false){if(optional&&String(value).trim()==='')return null;if(!/^\d+$/.test(String(value).trim())||!Number.isSafeInteger(Number(value)))throw Error(label+'은 0 이상의 정수로 입력해 주세요.');return Number(value)}
  function validate(memory){
+  globalThis.ExedraCharacters?.validate(memory);
   if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(memory.id)||memory.id.length>100)throw Error('식별자는 영문 소문자·숫자·하이픈으로 입력해 주세요.');
   if(!memory.character_ko.trim()||!memory.name_ko.trim())throw Error('캐릭터명과 기억 이름을 입력해 주세요.');
   if(!['한정','통상','배포'].includes(memory.acquisition))throw Error('입수 구분을 확인해 주세요.');
@@ -32,7 +33,7 @@
   const normalize=value=>(value||'').normalize('NFKC').replace(/\s+/gu,'').toLowerCase();
   const ja=normalize(memory.character_ja),ko=normalize(memory.character_ko);
   if(!ja&&!ko)throw Error('캐릭터명을 먼저 입력해 주세요.');
-  const matches=entries.map(entry=>entry.memory||entry).filter(k=>{const otherJa=normalize(k.character_ja);return ja&&otherJa?ja===otherJa:Boolean(ko&&ko===normalize(k.character_ko))}).filter(k=>k.voice_actor?.trim());
+  const matches=entries.map(entry=>entry.memory||entry).filter(k=>globalThis.ExedraCharacters?ExedraCharacters.sameCharacter(memory,k):(()=>{const otherJa=normalize(k.character_ja);return ja&&otherJa?ja===otherJa:Boolean(ko&&ko===normalize(k.character_ko))})()).filter(k=>!k.voice_actor_override&&k.voice_actor?.trim());
   if(!matches.length)throw Error('같은 캐릭터의 등록된 성우 정보가 없습니다. 캐릭터명을 확인하거나 직접 입력해 주세요.');
   const actors=new Set(matches.map(k=>k.voice_actor.trim())),urls=new Set(matches.map(k=>k.voice_actor_url?.trim()||'').filter(Boolean));
   if(actors.size!==1||urls.size>1)throw Error('같은 캐릭터의 성우 정보가 서로 다릅니다. 기존 자료를 확인한 뒤 직접 입력해 주세요.');

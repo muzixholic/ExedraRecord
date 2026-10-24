@@ -27,11 +27,12 @@ function list(){
 function tab(name){for(const panel of document.querySelectorAll('.tab-panel'))panel.hidden=panel.id!=='tab-'+name;for(const button of document.querySelectorAll('[data-tab]'))button.setAttribute('aria-selected',String(button.dataset.tab===name))}
 for(const button of document.querySelectorAll('[data-tab]'))button.onclick=()=>tab(button.dataset.tab);
 for(const [name,values]of [['element',model.elements],['role',model.roles]])for(const value of values){const option=node('option',value.replace('디펜더','디팬더'));option.value=value;field(name).append(option)}
-const basics=['id','character_ko','character_ja','voice_actor','voice_actor_url','work','name_ko','name_ja','rarity','element','role','acquisition','stats_note','illustration_url','thumbnail_url','pv_url','image','source_url','source_note','verification'];
+const basics=['id','character_ko','character_ja','voice_actor','voice_actor_url','character_group','work','name_ko','name_ja','rarity','element','role','acquisition','stats_note','illustration_url','thumbnail_url','pv_url','image','source_url','source_note','verification'];
 function edit(entry){
  current=model.clone(entry.memory);revision=entry.revision||null;current.acquisition=current.acquisition||(current.limited?'한정':'통상');current.skills??=[];current.limit_breaks??=[];current.groups=ExedraAffiliations.groupsFor(current);
  $('#welcome').hidden=true;$('#editor').hidden=false;
- for(const key of basics)field(key).value=current[key]??'';
+ for(const key of basics)if(key!=='character_group')field(key).value=current[key]??'';field('character_group').replaceChildren();
+ renderCharacterGroups();$('#voice-override').checked=Boolean(current.voice_actor_override);
  syncGroup();
  field('id').readOnly=!!revision;
  for(const key of ['HP','공격력','방어력','스피드'])field('stat-'+key).value=current.stats?.[key]??'';
@@ -41,7 +42,7 @@ function edit(entry){
 }
 function collectDraft(){
  const result=model.clone(current);
- for(const key of basics)result[key]=field(key).value.trim();result.rarity=Number(result.rarity);result.groups=result.work==='magia-record'?[...current.groups]:[];delete result.group;
+ for(const key of basics)result[key]=field(key).value.trim();result.character_group=result.character_group||ExedraCharacters.key(result);result.voice_actor_override=$('#voice-override').checked;result.rarity=Number(result.rarity);result.groups=result.work==='magia-record'?[...current.groups]:[];delete result.group;
  result.stats={...result.stats};for(const key of ['HP','공격력','방어력','스피드'])result.stats[key]=field('stat-'+key).value.trim();
  for(const key of ['translation_notes','pending'])result[key]=field(key).value.split('\n').map(v=>v.trim()).filter(Boolean);
  for(const skill of result.skills){for(const key of ['break','adjacent_break'])if(key in skill)skill[key]=model.numeric(skill[key]??'',key==='break'?'브레이크 감소량':'인접 브레이크 감소량',true);if(!skill.cost)skill.cost=null}
@@ -136,10 +137,18 @@ for(const button of document.querySelectorAll('[data-wiki]'))button.onclick=()=>
 });
 
 function syncVoice(source,{manual=false}={}){
- try{const value=model.findVoice({character_ko:field('character_ko').value,character_ja:field('character_ja').value},source);field('voice_actor').value=value.voice_actor;field('voice_actor_url').value=value.voice_actor_url;setDirty(true);message('같은 캐릭터의 성우와 문서 주소를 가져왔습니다. 기억 저장을 눌러 반영해 주세요.')}catch(error){if(manual)throw error}
+ try{const value=model.findVoice({character_ko:field('character_ko').value,character_ja:field('character_ja').value,character_group:field('character_group').value},source);field('voice_actor').value=value.voice_actor;field('voice_actor_url').value=value.voice_actor_url;setDirty(true);message('같은 캐릭터의 성우와 문서 주소를 가져왔습니다. 기억 저장을 눌러 반영해 주세요.')}catch(error){if(manual)throw error}
 }
 $('#sync-voice').onclick=()=>run(async()=>{const latest=await native('load');if(!latest)throw Error('기존 캐릭터 정보를 불러오지 못했습니다.');syncVoice(latest.entries,{manual:true})});
-for(const key of ['character_ko','character_ja'])field(key).addEventListener('change',()=>syncVoice(entries));
+function renderCharacterGroups(){
+ const select=field('character_group'),selected=select.value||current?.character_group||'';
+ const memory={character_ko:field('character_ko').value,character_ja:field('character_ja').value,character_group:selected};
+ select.replaceChildren();const automatic=node('option','자동 · '+ExedraCharacters.label({...memory,character_group:''},entries));automatic.value='';select.append(automatic);
+ for(const group of ExedraCharacters.choices([...entries,memory])){const option=node('option',group.label);option.value=group.id;select.append(option)}select.value=selected;
+}
+for(const key of ['character_ko','character_ja'])field(key).addEventListener('change',()=>{renderCharacterGroups();if(!$('#voice-override').checked)syncVoice(entries)});
+field('character_group').onchange=()=>{current.character_group=field('character_group').value;setDirty(true);if(!$('#voice-override').checked)syncVoice(entries)};
+$('#voice-override').onchange=()=>{setDirty(true);if(!$('#voice-override').checked)syncVoice(entries)};
 function confirmUnregisteredWork(){
  const dialog=$('#work-warning-dialog');dialog.showModal();return new Promise(resolve=>{
   const select=()=>{dialog.close();tab('basic');message('작품을 선택한 뒤 다시 저장해 주세요. 입력 내용은 유지됩니다.');setTimeout(()=>$('#work-tags button')?.focus(),0);resolve(false)};
