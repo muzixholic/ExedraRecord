@@ -40,5 +40,101 @@
     "character_ko" : "나나미 야치요",
     "voice_actor" : "아마미야 소라",
     "voice_actor_url" : "https://namu.wiki/w/아마미야%20소라"
+  },
+  {
+    "character_ja" : "環いろは",
+    "character_ko" : "타마키 이로하",
+    "voice_actor" : "아사쿠라 모모",
+    "voice_actor_url" : "https://namu.wiki/w/아사쿠라%20모모"
+  },
+  {
+    "character_ja" : "佐倉 杏子",
+    "character_ko" : "사쿠라 쿄코",
+    "voice_actor" : "노나카 아이",
+    "voice_actor_url" : "https://namu.wiki/w/노나카%20아이"
+  },
+  {
+    "character_ja" : "和泉十七夜",
+    "character_ko" : "이즈미 카나기",
+    "voice_actor" : "센본기 사야카",
+    "voice_actor_url" : "https://namu.wiki/w/센본기%20사야카"
+  },
+  {
+    "character_ja" : "タルトver.Final",
+    "character_ko" : "타루토 ver.Final",
+    "voice_actor" : "",
+    "voice_actor_url" : ""
+  },
+  {
+    "character_ja" : "メリッサ・ド・ヴィニョル",
+    "character_ko" : "멜리사 드 비뇰",
+    "voice_actor" : "키쿠마 아이",
+    "voice_actor_url" : "https://namu.wiki/w/카쿠마%20아이"
+  },
+  {
+    "character_ja" : "リズ・ホークウッド",
+    "character_ko" : "리즈 호크우드",
+    "voice_actor" : "코시미즈 아미",
+    "voice_actor_url" : "https://namu.wiki/w/코시미즈%20아미"
+  },
+  {
+    "character_ja" : "五十鈴れん",
+    "character_ko" : "이스즈 렌",
+    "voice_actor" : "오자키 유카",
+    "voice_actor_url" : "https://namu.wiki/w/오자키%20유카"
+  },
+  {
+    "character_ja" : "綾野梨花",
+    "character_ko" : "아야노 리카",
+    "voice_actor" : "이토 카나에",
+    "voice_actor_url" : "https://namu.wiki/w/이토%20카나에"
+  },
+  {
+    "character_ja" : "斧乃木余接",
+    "character_ko" : "오노노키 요츠기",
+    "voice_actor" : "하야미 사오리",
+    "voice_actor_url" : "https://namu.wiki/w/하야미%20사오리"
+  },
+  {
+    "character_ja" : "八九寺真宵",
+    "character_ko" : "하치쿠지 마요이",
+    "voice_actor" : "카토 에미리",
+    "voice_actor_url" : "https://namu.wiki/w/카토%20에미리"
+  },
+  {
+    "character_ja" : "忍野忍",
+    "character_ko" : "오시노 시노부",
+    "voice_actor" : "사카모토 마아야",
+    "voice_actor_url" : "https://namu.wiki/w/사카모토%20마아야"
+  },
+  {
+    "character_ja" : "日暮ふうか",
+    "character_ko" : "히구레 후우카",
+    "voice_actor" : "토요타 모에",
+    "voice_actor_url" : "https://namu.wiki/w/토요타%20모에"
+  },
+  {
+    "character_ja" : "夜明すみれ",
+    "character_ko" : "요아케 스미레",
+    "voice_actor" : "이토 미쿠",
+    "voice_actor_url" : "https://namu.wiki/w/이토%20미쿠"
+  },
+  {
+    "character_ja" : "コルボー",
+    "character_ko" : "코르보",
+    "voice_actor" : "오오츠보 유카",
+    "voice_actor_url" : "https://namu.wiki/w/오오츠보%20유카"
+  },
+  {
+    "character_ja" : "タルト",
+    "character_ko" : "타루토",
+    "voice_actor" : "호리에 유이",
+    "voice_actor_url" : "https://namu.wiki/w/호리에%20유이"
+  },
+  {
+    "character_ja" : "百江 なぎさ",
+    "character_ko" : "모모에 나기사",
+    "voice_actor" : "아스미 카나",
+    "voice_actor_url" : "https://namu.wiki/w/아스미%20카나"
   }
 ]

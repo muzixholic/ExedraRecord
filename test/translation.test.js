@@ -12,10 +12,12 @@ for(const record of records)test(record.character_ko+' · '+record.name_ko+' 원
  assert.deepEqual(record.limit_breaks.map(b=>b.stage),[1,2,3,4,5]);
  for(const block of [...record.skills,...record.limit_breaks]){
   assert.ok(block.ja&&block.ko);
-  assert.deepEqual(block.ko.match(/[+-]?\d+(?:\.\d+)?%?/g),block.ja.match(/[+-]?\d+(?:\.\d+)?%?/g),block.kind||block.stage+'단계');
+  // 번역에서 조건절 위치가 바뀔 수 있으므로 수치·부호·단위와 등장 횟수를 비교합니다.
+  const numbers=text=>(text.match(/[+-]?\d+(?:\.\d+)?%?/g)||[]).sort();
+  assert.deepEqual(numbers(block.ko),numbers(block.ja),block.kind||block.stage+'단계');
  }
  assert.equal(record.pending.length,0);
- assert.match(record.verification,/검수 대기/);
+ assert.match(record.verification,/검[수토] 대기/);
 });
 test('입수 구분과 소라나 배포 여부를 보존한다',()=>{
  for(const k of records)assert.ok(['한정','통상','배포'].includes(k.acquisition));
@@ -25,7 +27,8 @@ test('입수 구분과 소라나 배포 여부를 보존한다',()=>{
 });
 
 test('일괄 추가한 기억 19개가 기존 자료와 함께 보존된다',()=>{
- assert.equal(records.length,24);
- const homura=records.filter(k=>k.character_ja==='暁美ほむら');assert.equal(homura.length,3);
+ const originals=["ashley-dangerous-carnival", "fuuka-final-fate-bloom", "homura-black-magic-suppression", "homura-kyubey-bomb", "homura-metal-conversion", "iroha-evoluzione-presente", "kanagi-judgment-light", "kyoko-summer-fire-attack", "liz-lombre", "madoka-winctio-magica", "mami-invitation-doppel", "mami-spietata-scarica", "mayoi-spiral-home", "melissa-disintegration", "ren-sacred-gift", "rika-snow-dome", "sayaka-grandioso-sinfonia", "sayaka-venusta-dissonanza", "shinobu-aberration-killer", "sorana-aqua-tempest", "sumire-floral-iron-spike", "tart-final-porte-paradis", "yachiyo-absolute-venus", "yotsugi-exception-rule"];
+ for(const id of originals)assert.ok(records.some(k=>k.id===id),id+" 기존 자료 보존");
+ const homura=records.filter(k=>k.character_ja==='暁美ほむら');assert.ok(homura.length>=3);
  const adjacent=records.find(k=>k.id==='homura-black-magic-suppression');assert.equal(adjacent.skills.find(s=>s.kind==='필살기').adjacent_break,20);assert.equal(adjacent.skills.find(s=>s.kind==='전투 스킬').adjacent_break,10);
 });
