@@ -62,6 +62,11 @@ struct CoreTests {
   let portraitSQL=try String(contentsOf:store.exportPortraitMigration(),encoding:.utf8);precondition(portraitSQL.contains("INSERT INTO portraits"))
   var badPortrait=portrait;badPortrait["rarity"]=3;mustFail { try MemoryStore.validatePortrait(badPortrait) }
   badPortrait=portrait;badPortrait["ability_levels"]=[] as [[String:Any]];mustFail { try MemoryStore.validatePortrait(badPortrait) }
+  var acquiredPortrait=portrait
+  for source in ["distribution","story","puella-pictura"] { acquiredPortrait["acquisition_type"]=source;try MemoryStore.validatePortrait(acquiredPortrait) }
+  acquiredPortrait["acquisition_type"]="story";acquiredPortrait["story_id"]="main-story-one";try MemoryStore.validatePortrait(acquiredPortrait)
+  acquiredPortrait["acquisition_type"]="distribution";mustFail { try MemoryStore.validatePortrait(acquiredPortrait) }
+  acquiredPortrait["acquisition_type"]="unknown";acquiredPortrait["story_id"]="";mustFail { try MemoryStore.validatePortrait(acquiredPortrait) }
   print("로컬 저장·수정·백업·충돌 방지·자료 보존·주소 검증·배포 파일 검증 통과")
  }
 }

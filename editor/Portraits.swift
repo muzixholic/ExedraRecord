@@ -14,6 +14,11 @@ extension MemoryStore {
     static func portraitName(_ value:String) -> String { value.replacingOccurrences(of:"\\s*[+＋]\\s*[0-5]\\s*$",with:"",options:.regularExpression).trimmingCharacters(in:.whitespacesAndNewlines) }
     static func validatePortrait(_ p:[String:Any]) throws {
         guard let id=p["id"] as? String,validID(id),let name=p["name_ko"] as? String,!portraitName(name).isEmpty,p["name_ja"] is String,[4,5].contains(p["rarity"] as? Int ?? 0),let stats=p["stats_max"] as? [String:Any] else { throw EditorError.message("포트레이트 이름·등급·최대 스테이터스를 확인해 주세요.") }
+        let acquisition=p["acquisition_type"] as? String ?? "",story=p["story_id"] as? String ?? ""
+        if let source=p["acquisition_type"],!(source is NSNull),!(source is String) { throw EditorError.message("입수처 형식을 확인해 주세요.") }
+        if let reference=p["story_id"],!(reference is NSNull),!(reference is String) { throw EditorError.message("스토리 참조값 형식을 확인해 주세요.") }
+        guard acquisition.isEmpty || ["distribution","story","puella-pictura"].contains(acquisition) else { throw EditorError.message("입수처는 배포·스토리·푸엘라 픽투러 중 하나를 선택해 주세요.") }
+        guard story.isEmpty || (acquisition == "story" && Self.validID(story)) else { throw EditorError.message("스토리 참조값을 확인해 주세요.") }
         for key in ["HP","공격력","방어력"] { guard let n=stats[key] as? NSNumber,CFGetTypeID(n) != CFBooleanGetTypeID(),n.doubleValue >= 0,n.doubleValue <= 9_007_199_254_740_991,n.doubleValue.rounded() == n.doubleValue else { throw EditorError.message("최대 한계돌파 \(key)를 0 이상의 정수로 입력해 주세요.") } }
         guard let stages=p["ability_levels"] as? [[String:Any]],stages.count == 6 else { throw EditorError.message("어빌리티는 +0~+5 여섯 단계를 각각 기록해 주세요.") }
         var seen=Set<Int>()
