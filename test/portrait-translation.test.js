@@ -1,0 +1,24 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdtemp,rm,access} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {portraitSchema,portraitPrompt,validatePortraitTranslation,translatePortrait} from '../editor/service/portrait-translation.mjs';
+const model=globalThis.PortraitModel;
+function draft(){return {name_ko:'이름+5',name_ja:'名前+5',rarity:5,stats_max:{HP:100,공격력:20,방어력:30},displayed_enhancement:5,effects:[{text_ko:'공격력 +7.5%',text_ja:'攻撃力+7.5%',condition_ko:'',condition_ja:''}],review_notes:[]}}
+test('포트레이트 초벌 스키마는 이름 강화 꼬리를 제거하고 잘못된 필드·분류·수치를 거부한다',()=>{
+ assert.equal(validatePortraitTranslation(draft()).name_ja,'名前');for(const change of [{unexpected:true},{rarity:3},{displayed_enhancement:6},{stats_max:{HP:-1,공격력:20,방어력:30}},{effects:[{text_ko:'효과'}]}])assert.throws(()=>validatePortraitTranslation({...draft(),...change}));
+ const value=draft();value.stats_max.HP=null;value.displayed_enhancement=null;value.rarity=null;const checked=validatePortraitTranslation(value);assert.ok(checked.review_notes.some(v=>v.includes('최대 HP')));assert.ok(checked.review_notes.some(v=>v.includes('어느 단계에도')));
+});
+test('초벌 적용은 해당 강화 단계만 교체하고 입수처·스토리·일러스트·다른 단계는 보존한다',()=>{
+ const base=model.blank('existing');Object.assign(base,{acquisition_type:'story',story_id:'story-one',image_url:'/images/art.png',thumbnail_url:'/images/thumb.jpg',source_url:'https://example.test/original',source_image:'/images/source.jpg',future:{보존:true}});base.ability_levels[0].effects=[{text_ko:'스피드 +5%',text_ja:'スピード+5%',condition_ko:'기존 조건',condition_ja:'',tags:['스피드']}];const result=model.applyTranslation(base,validatePortraitTranslation(draft()),'/images/source.jpg');assert.equal(result.id,'existing');assert.equal(result.acquisition_type,'story');assert.equal(result.story_id,'story-one');assert.equal(result.image_url,base.image_url);assert.equal(result.thumbnail_url,base.thumbnail_url);assert.equal(result.source_url,base.source_url);assert.deepEqual(result.ability_levels[0],base.ability_levels[0]);assert.equal(result.ability_levels[5].effects.length,1);assert.deepEqual(result.future,base.future);assert.equal(base.ability_levels[5].effects.length,0);
+});
+test('판독 불명 수치와 단계는 새 자료에 임의 배정하지 않고 효과 원문을 검토 메모에 보존한다',()=>{
+ const value=draft();value.stats_max.HP=null;value.displayed_enhancement=null;value.rarity=null;const p=model.applyTranslation(model.blank('unknown'),validatePortraitTranslation(value),'/images/source.jpg',{isNew:true});assert.equal(p.rarity,'');assert.equal(p.stats_max.HP,'');assert.ok(p.ability_levels.every(stage=>!stage.effects.length));assert.ok(p.translation_notes.some(v=>v.includes('攻撃力+7.5%')));assert.equal(p.image_url,'/images/source.jpg');
+});
+test('포트레이트 번역은 전용 스키마·프롬프트와 읽기 전용 실행을 사용하고 임시 자료를 정리한다',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'exedra-portrait-ai-test-'));let directory,calls=0;try{const image=join(root,'input.jpeg');await writeFile(image,'시험 이미지');const result=await translatePortrait({image,codex:'codex',run:async(_exe,args,options)=>{if(args[0]==='login')return 'Logged in using ChatGPT';calls++;directory=options.cwd;assert.ok(args.includes('read-only'));assert.ok(args.includes('--ignore-user-config'));assert.equal(options.input,portraitPrompt);assert.deepEqual(JSON.parse(await readFile(join(directory,'schema.json'),'utf8')),portraitSchema);assert.ok(args[args.indexOf('--image')+1].endsWith('.jpeg'));await writeFile(join(directory,'result.json'),JSON.stringify(draft()));return ''}});assert.equal(result.draft.displayed_enhancement,5);assert.equal(calls,1);await assert.rejects(access(directory));await assert.rejects(()=>translatePortrait({image,codex:'codex',run:async()=> 'API key login'}),/ChatGPT/)}finally{await rm(root,{recursive:true,force:true})}
+});
+test('기존 3장의 실제 AI 추출 결과는 최대 수치·등급·강화 단계·조건과 일치한다',async()=>{
+ const {items}=JSON.parse(await readFile('test/fixtures/portrait-extraction-2026-10-24.json','utf8'));assert.equal(items.length,3);for(const item of items){const p=JSON.parse(await readFile('data/portraits/'+item.id+'.json','utf8')),checked=validatePortraitTranslation(item.draft),result=model.applyTranslation(model.blank('new-'+item.id),checked,'/'+item.image.replace(/^public\//,''),{isNew:true});assert.equal(checked.name_ja,p.name_ja);assert.equal(checked.rarity,p.rarity);assert.deepEqual(checked.stats_max,p.stats_max);const original=p.ability_levels.find(stage=>stage.effects.length);assert.equal(checked.displayed_enhancement,original.level);assert.equal(checked.effects.length,original.effects.length);assert.equal(result.ability_levels.filter(stage=>stage.effects.length).length,1);model.validate(result);if(item.id==='no-one-comes'){assert.equal(checked.effects[0].condition_ko,'');assert.match(checked.effects[1].condition_ja,/メリッサ/);assert.ok(model.abilityTags(result).includes('스피드'))}}
+});

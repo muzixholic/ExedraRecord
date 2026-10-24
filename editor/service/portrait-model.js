@@ -4,7 +4,7 @@
  const acquisitionOptions=[{id:'distribution',label:'배포'},{id:'story',label:'스토리'},{id:'puella-pictura',label:'푸엘라 픽투러'}];
  const clone=v=>JSON.parse(JSON.stringify(v));
  const cleanName=v=>String(v||'').replace(/\s*[+＋]\s*[0-5]\s*$/u,'').trim();
- function blank(id){return {id,name_ko:'',name_ja:'',rarity:5,acquisition_type:'',story_id:'',image_url:'',thumbnail_url:'',source_image:'',source_url:'',source_note:'',verification:'입력 중 · 검토 대기',stats_max:{HP:'',공격력:'',방어력:''},ability_levels:Array.from({length:6},(_,level)=>({level,effects:[]}))}}
+ function blank(id){return {id,name_ko:'',name_ja:'',rarity:5,acquisition_type:'',story_id:'',image_url:'',thumbnail_url:'',source_image:'',source_url:'',source_note:'',verification:'입력 중 · 검토 대기',translation_notes:[],stats_max:{HP:'',공격력:'',방어력:''},ability_levels:Array.from({length:6},(_,level)=>({level,effects:[]}))}}
  const levels=p=>Array.from({length:6},(_,level)=>p.ability_levels?.find(k=>k.level===level)||{level,effects:[]});
  const aliases={'공격력':['攻撃力'],'방어력':['防御力'],'스피드':['スピード'],'MP 회복 효율':['MP回復効率'],'치명타 확률':['クリティカル率'],'치명타 피해':['クリティカルダメージ'],'추격 피해':['추격','追撃'],'반격 피해':['반격','反撃'],'필살기 피해':['필살기','必殺技'],'전투 스킬 피해':['전투 스킬','戦闘スキル']};
  function effectTags(effect){const text=[effect.text_ko,effect.text_ja].filter(Boolean).join(' ').replace(/\s/g,'');return tags.filter(tag=>(effect.tags||[]).includes(tag)||[tag,...(aliases[tag]||[])].some(v=>(tag==='MP 회복'?text.replace(/MP회복효율|MP回復効率/g,''):text).includes(v.replace(/\s/g,''))))}
@@ -19,8 +19,22 @@
   if(!Array.isArray(p.ability_levels)||p.ability_levels.length!==6||new Set(p.ability_levels.map(k=>k?.level)).size!==6)throw Error('어빌리티는 +0~+5 여섯 단계를 각각 기록해 주세요.');
   for(const stage of p.ability_levels){if(!Number.isInteger(stage.level)||stage.level<0||stage.level>5||!Array.isArray(stage.effects)||stage.effects.length>50)throw Error('강화 단계의 효과 목록을 확인해 주세요.');for(const e of stage.effects){if(!e||typeof e!=='object'||!['text_ko','text_ja','condition_ko','condition_ja'].every(key=>typeof e[key]==='string')||!e.text_ko.trim()||!Array.isArray(e.tags)||e.tags.some(tag=>!tags.includes(tag)))throw Error('어빌리티 효과의 한국어 설명·조건·분류를 확인해 주세요.')}}
   for(const key of ['image_url','thumbnail_url','source_image','source_url','source_note','verification'])if(p[key]!=null&&typeof p[key]!=='string')throw Error('이미지·출처 자료 형식을 확인해 주세요.');
+  if(p.translation_notes!==undefined&&(!Array.isArray(p.translation_notes)||p.translation_notes.some(v=>typeof v!=='string')))throw Error('초벌 입력 검토 메모 형식을 확인해 주세요.');
   return p;
  }
  function normalized(p){const value=clone(p);value.acquisition_type??='';value.story_id=value.acquisition_type==='story'?(value.story_id||''):'';value.name_ko=cleanName(value.name_ko);value.name_ja=cleanName(value.name_ja);for(const key of ['HP','공격력','방어력']){const raw=value.stats_max[key];if(!/^\d+$/.test(String(raw).trim()))throw Error('최대 한계돌파 '+key+'를 입력해 주세요.');value.stats_max[key]=Number(raw)}return validate(value)}
- globalThis.PortraitModel={tags,acquisitionOptions,clone,cleanName,blank,levels,effectTags,abilityTags,validate,normalized};
+ function applyTranslation(base,draft,sourceImage,{isNew=false}={}){
+  const value=clone(base);
+  for(const key of ['name_ko','name_ja'])if(draft[key]!==null)value[key]=cleanName(draft[key]);
+  if(draft.rarity!==null)value.rarity=draft.rarity;else if(isNew)value.rarity='';
+  for(const key of ['HP','공격력','방어력'])if(draft.stats_max[key]!==null)value.stats_max[key]=draft.stats_max[key];else if(isNew)value.stats_max[key]='';
+  value.ability_levels=levels(value);const notes=[...(value.translation_notes||[]),...draft.review_notes];
+  if(draft.displayed_enhancement!==null&&draft.effects.length)value.ability_levels[draft.displayed_enhancement]={level:draft.displayed_enhancement,effects:draft.effects.map(e=>({...clone(e),tags:[]}))};
+  else if(draft.displayed_enhancement===null)for(const effect of draft.effects)notes.push('강화 단계 확인 후 직접 입력: '+(effect.condition_ko?'['+effect.condition_ko+'] ':'')+effect.text_ko+' / '+effect.condition_ja+' '+effect.text_ja);
+  value.translation_notes=[...new Set(notes)];value.verification='AI 초벌 입력 · 원문·수치·강화 단계 검토 대기';
+  if(sourceImage&&sourceImage!==base.source_image){value.source_url='';value.source_note='사용자가 가져온 포트레이트 인게임 이미지. AI 초벌 입력 원본.'}
+  value.source_image=sourceImage||base.source_image||'';if(!value.image_url)value.image_url=sourceImage||'';
+  return value;
+ }
+ globalThis.PortraitModel={tags,acquisitionOptions,clone,cleanName,blank,levels,effectTags,abilityTags,validate,normalized,applyTranslation};
 })();

@@ -27,6 +27,7 @@ extension MemoryStore {
             guard let number=stage["level"] as? NSNumber,CFGetTypeID(number) != CFBooleanGetTypeID(),number.doubleValue.rounded() == number.doubleValue,(0...5).contains(number.intValue),seen.insert(number.intValue).inserted,let effects=stage["effects"] as? [[String:Any]],effects.count <= 50 else { throw EditorError.message("강화 단계·효과 목록을 확인해 주세요.") }
             for effect in effects { guard ["text_ko","text_ja","condition_ko","condition_ja"].allSatisfy({effect[$0] is String}),let text=effect["text_ko"] as? String,!text.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty,let values=effect["tags"] as? [String],values.allSatisfy({tags.contains($0)}) else { throw EditorError.message("어빌리티 효과의 한국어 설명·조건·분류를 확인해 주세요.") } }
         }
+        if let notes=p["translation_notes"],!(notes is [String]) { throw EditorError.message("초벌 입력 검토 메모 형식을 확인해 주세요.") }
         for key in ["image_url","thumbnail_url","source_image","source_url","source_note","verification"] { if let value=p[key],!(value is NSNull),!(value is String) { throw EditorError.message("이미지·출처 자료 형식을 확인해 주세요.") } }
     }
     func loadPortraits() throws -> [[String:Any]] {

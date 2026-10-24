@@ -5,6 +5,7 @@ import {join,resolve,dirname,delimiter,basename,relative,isAbsolute} from 'node:
 import {pathToFileURL} from 'node:url';
 import {prepare,publish} from './deployment.mjs';
 import {translate} from './translation.mjs';
+import {translatePortrait} from './portrait-translation.mjs';
 const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
 const progress=message=>send({event:'progress',message});
 let child=null,cancelled=false;const cancellation=new AbortController();
@@ -34,6 +35,7 @@ export async function run(executable,args,{cwd,input,timeout=120_000}={}){
 }
 export async function execute(job){
  const root=resolve(job.root);const node=process.execPath;const wrangler=join(root,'node_modules/wrangler/bin/wrangler.js');
+ if(job.action==='translatePortrait')return {...await translatePortrait({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='translate')return {...await translate({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='prepareDeploy'){progress('로컬 기억과 이미지를 고정해 반영 자료를 준비하는 중');return await prepare(root)}
  if(job.action==='publish'){const plan=JSON.parse(await readFile(job.plan,'utf8'));const planRelative=relative(join(root,'.editor-jobs'),resolve(plan.directory));if(resolve(plan.root)!==root||!planRelative||planRelative.startsWith('..')||isAbsolute(planRelative))throw Error('반영 자료 경로가 올바르지 않습니다.');return publish(plan,{node,wrangler,run,progress,signal:cancellation.signal})}

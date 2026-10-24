@@ -106,10 +106,10 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
             case "publish":
                 guard !dirty,let plan=preparedPlan else { throw EditorError.message("서버 반영 준비를 먼저 진행해 주세요.") }
                 try startOnline(action,id:id,payload:["plan":plan.path])
-            case "translate":
+            case "translate", "translatePortrait":
                 var imagePath=body["image"] as? String ?? ""
                 if imagePath.isEmpty {
-                    let panel=NSOpenPanel();panel.allowedContentTypes=[.png,.jpeg,.webP,.heic,.tiff];panel.prompt="초벌 번역할 이미지 선택";panel.message="공식 소개 이미지를 Codex로 보내 초벌 번역합니다. 인터넷 연결과 Codex 사용량이 필요합니다."
+                    let panel=NSOpenPanel();panel.allowedContentTypes=[.png,.jpeg,.webP,.heic,.tiff];panel.prompt="초벌 번역할 이미지 선택";panel.message="선택한 이미지를 Codex로 보내 초벌 입력합니다. 인터넷 연결과 Codex 사용량이 필요합니다."
                     guard panel.runModal() == .OK,let url=panel.url else { reply(id,value:NSNull());return }
                     let size=try url.resourceValues(forKeys:[.fileSizeKey]).fileSize ?? 0
                     guard size<=50_000_000,let image=NSImage(contentsOf:url) else { throw EditorError.message("50MB 이하의 이미지 파일을 선택해 주세요.") }

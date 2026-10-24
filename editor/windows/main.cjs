@@ -46,7 +46,7 @@ async function handle(body){
   if(action==='upload'){const source=await pickImage();return source?await importImage(source):null}
   if(action==='preview'){if(!body.path)return null;const image=nativeImage.createFromPath(await store.localAsset(body.path));return image.isEmpty()?null:'data:image/jpeg;base64,'+resized(image,1000).toJPEG(85).toString('base64')}
   if(['connections','loginCodex','loginCloudflare'].includes(action))return await online(action);
-  if(action==='translate'){let image=body.image;if(!image){const source=await pickImage();if(!source)return null;image=(await importImage(source)).image}return await online('translate',{image:await store.localAsset(image),sourceImage:image})}
+  if(['translate','translatePortrait'].includes(action)){let image=body.image;if(!image){const source=await pickImage();if(!source)return null;image=(await importImage(source)).image}return await online(action,{image:await store.localAsset(image),sourceImage:image})}
   if(action==='export'){if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');return await store.exportMigration()}
   if(action==='prepareDeploy'){if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');const {validate}=await import('./store.mjs');for(const {memory}of await store.load())validate(memory);const portraits=new PortraitStore(store.root);for(const {memory}of await portraits.load())portraits.validate(memory);prepared=await online(action);return prepared}
   if(action==='publish'){if(dirty||!prepared)throw Error('저장 후 서버 반영 준비를 먼저 진행해 주세요.');return await online(action,{plan:join(prepared.directory,'plan.json')})}

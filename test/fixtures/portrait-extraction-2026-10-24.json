@@ -1,0 +1,96 @@
+{
+  "검증일": "2026-10-24",
+  "설명": "기존 사용자 제공 3장의 실제 Codex 추출 결과. 자동 테스트에서는 API를 호출하지 않고 이 자료로 회귀 검증합니다.",
+  "items": [
+    {
+      "id": "different-glasses",
+      "image": "public/images/portrait-different-glasses-source.jpg",
+      "draft": {
+        "name_ko": "가끔은 평소와 다른 안경으로",
+        "name_ja": "たまにはいつもと違うメガネで",
+        "rarity": 5,
+        "stats_max": {
+          "HP": 191,
+          "공격력": 215,
+          "방어력": 368
+        },
+        "displayed_enhancement": 5,
+        "effects": [
+          {
+            "text_ko": "MP 회복 효율+15%",
+            "text_ja": "MP回復効率+15%",
+            "condition_ko": "",
+            "condition_ja": ""
+          }
+        ],
+        "review_notes": [
+          "AI 초벌 입력입니다. 이름·등급·최대 스테이터스·강화 단계·조건을 확인한 뒤 저장해 주세요."
+        ]
+      }
+    },
+    {
+      "id": "magia-day-2026",
+      "image": "public/images/portrait-magia-day-2026-source.jpg",
+      "draft": {
+        "name_ko": "Magia Day 2026 개최 기념",
+        "name_ja": "Magia Day 2026開催記念",
+        "rarity": 5,
+        "stats_max": {
+          "HP": 401,
+          "공격력": 118,
+          "방어력": 136
+        },
+        "displayed_enhancement": 5,
+        "effects": [
+          {
+            "text_ko": "공격력+7.5%",
+            "text_ja": "攻撃力+7.5%",
+            "condition_ko": "",
+            "condition_ja": ""
+          },
+          {
+            "text_ko": "스피드+10%",
+            "text_ja": "スピード+10%",
+            "condition_ko": "",
+            "condition_ja": ""
+          }
+        ],
+        "review_notes": [
+          "AI 초벌 입력입니다. 이름·등급·최대 스테이터스·강화 단계·조건을 확인한 뒤 저장해 주세요."
+        ]
+      }
+    },
+    {
+      "id": "no-one-comes",
+      "image": "public/images/portrait-no-one-comes-source.jpg",
+      "draft": {
+        "name_ko": "마중은 오지 않는다",
+        "name_ja": "迎えは来ない",
+        "rarity": 4,
+        "stats_max": {
+          "HP": 637,
+          "공격력": 90,
+          "방어력": 85
+        },
+        "displayed_enhancement": 0,
+        "effects": [
+          {
+            "text_ko": "추격/반격으로 주는 피해+5%",
+            "text_ja": "【追撃/反撃】で与えるダメージ+5%",
+            "condition_ko": "",
+            "condition_ja": ""
+          },
+          {
+            "text_ko": "스피드+5%",
+            "text_ja": "スピード+5%",
+            "condition_ko": "멜리사 드 비뇰에게 장착 시 추가",
+            "condition_ja": "メリッサ・ド・ヴィニョルに装備時に追加"
+          }
+        ],
+        "review_notes": [
+          "AI 초벌 입력입니다. 이름·등급·최대 스테이터스·강화 단계·조건을 확인한 뒤 저장해 주세요."
+        ]
+      }
+    }
+  ]
+}
