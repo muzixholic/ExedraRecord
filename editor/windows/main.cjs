@@ -11,10 +11,13 @@ const settings=()=>join(app.getPath('userData'),'project.json');
 async function discard(){if(operation){await dialog.showMessageBox(window,{message:'작업을 마치거나 취소한 뒤 진행해 주세요.',buttons:['확인']});return false}if(!dirty)return true;return (await dialog.showMessageBox(window,{type:'question',message:'저장하지 않은 변경이 있습니다.',detail:'변경을 버리고 계속할까요?',buttons:['계속 편집','변경 버리기'],defaultId:0,cancelId:0})).response===1}
 function stop(){if(!operation)return;if(process.platform==='win32')spawn(join(process.env.SystemRoot||'C:\\Windows','System32','taskkill.exe'),['/pid',String(operation.pid),'/T','/F'],{windowsHide:true});else operation.kill('SIGTERM')}
 async function online(action,payload={}){
+ const {commandPath,runnerLaunch}=await import('./service/executables.mjs');
+ const node=await commandPath('node');
+ const launch=runnerLaunch(node,join(__dirname,'service/runner.mjs'),'',process.env);
  const dir=await fs.mkdtemp(join(os.tmpdir(),'exedra-job-')),request=join(dir,'request.json');
  await fs.writeFile(request,JSON.stringify({action,root:store.root,...payload}));
  return new Promise((resolve,reject)=>{
-  const child=spawn(process.execPath,[join(__dirname,'service/runner.mjs'),request],{cwd:store.root,env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true});operation=child;let pending='',result,error,stderr='';
+  const child=spawn(launch.executable,[launch.args[0],request],{cwd:store.root,env:launch.env,windowsHide:true});operation=child;let pending='',result,error,stderr='';
   child.stdout.on('data',chunk=>{pending+=chunk;let end;while((end=pending.indexOf('\n'))>=0){const line=pending.slice(0,end);pending=pending.slice(end+1);try{const event=JSON.parse(line);if(event.event==='progress')window.webContents.send('editor:progress',event);if(event.event==='result')result=event.value;if(event.event==='error')error=event.message}catch{}}});
   child.stderr.on('data',chunk=>{stderr=(stderr+chunk).slice(-2000)});
   const cleanup=()=>{operation=null;fs.rm(dir,{recursive:true,force:true}).catch(()=>{})};

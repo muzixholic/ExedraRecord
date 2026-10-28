@@ -1,11 +1,13 @@
 import {spawn} from 'node:child_process';
 import {readFile,access} from 'node:fs/promises';
 import {constants} from 'node:fs';
-import {join,resolve,dirname,delimiter,basename,relative,isAbsolute} from 'node:path';
+import {join,resolve,dirname,basename,relative,isAbsolute} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {prepare,publish} from './deployment.mjs';
 import {translate} from './translation.mjs';
 import {correctionJob} from './corrections.mjs';
+import {commandPath,executionEnvironment,checkConnections} from './executables.mjs';
+export {commandPath,executableCandidates} from './executables.mjs';
 import {translatePortrait} from './portrait-translation.mjs';
 const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
 const progress=message=>send({event:'progress',message});
@@ -13,8 +15,6 @@ let child=null,cancelled=false;const cancellation=new AbortController();
 function stop(){cancelled=true;cancellation.abort();if(child?.pid){killTree(child.pid)}}
 process.on('SIGTERM',stop);process.on('SIGINT',stop);
 export const redact=text=>String(text).replace(/Bearer\s+\S+/gi,'Bearer [비공개]').replace(/(?:sk-|sk-proj-)[A-Za-z0-9_-]+/g,'[비공개]').replace(/(token|api_key|authorization)\s*[=:]\s*[^\s,}]+/gi,'$1=[비공개]');
-export function executableCandidates(name,platform=process.platform){return platform==='win32'?[name+'.exe',name+'.cmd',name]:[name]}
-export async function commandPath(name){for(const directory of [...(process.env.PATH||process.env.Path||'').split(delimiter),...(process.platform==='win32'?[process.env.APPDATA&&join(process.env.APPDATA,'npm')].filter(Boolean):['/opt/homebrew/bin','/usr/local/bin','/usr/bin'])].filter(Boolean)){for(const candidate of executableCandidates(name)){const path=join(directory,candidate);try{await access(path,constants.X_OK);return path}catch{}}}throw Error(name+' 실행 파일이 없습니다. 설치와 로그인 상태를 확인해 주세요.')}
 function killTree(pid){if(process.platform==='win32'){spawn(join(process.env.SystemRoot||'C:\\Windows','System32','taskkill.exe'),['/pid',String(pid),'/T','/F'],{windowsHide:true,stdio:'ignore'})}else{try{process.kill(-pid,'SIGTERM')}catch{}}}
 
 export async function run(executable,args,{cwd,input,timeout=120_000,outputLimit=12000}={}){
@@ -27,7 +27,7 @@ export async function run(executable,args,{cwd,input,timeout=120_000,outputLimit
 
  if(cancelled)return Promise.reject(Error('작업이 취소되었습니다.'));
  return new Promise((resolve,reject)=>{
-  let output='',timedOut=false;const processChild=spawn(executable,args,{cwd,detached:process.platform!=='win32',windowsHide:true,env:{...process.env,CI:'true',NO_COLOR:'1',WRANGLER_SEND_METRICS:'false',PATH:[dirname(process.execPath),'/opt/homebrew/bin','/usr/local/bin',process.env.PATH||''].join(delimiter)},stdio:['pipe','pipe','pipe']});child=processChild;
+  let output='',timedOut=false;const processChild=spawn(executable,args,{cwd,detached:process.platform!=='win32',windowsHide:true,env:{...executionEnvironment(process.execPath),CI:'true',NO_COLOR:'1',WRANGLER_SEND_METRICS:'false'},stdio:['pipe','pipe','pipe']});child=processChild;
   const timer=setTimeout(()=>{timedOut=true;killTree(processChild.pid)},timeout);
   const append=data=>{output=(output+data.toString()).slice(-outputLimit)};processChild.stdout.on('data',append);processChild.stderr.on('data',append);processChild.stdin.on('error',()=>{});processChild.stdin.end(input||'');
   processChild.once('error',error=>{clearTimeout(timer);reject(Error('실행하지 못했습니다: '+error.message))});
@@ -41,11 +41,7 @@ export async function execute(job){
  if(job.action==='translate')return {...await translate({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='prepareDeploy'){progress('로컬 기억과 이미지를 고정해 반영 자료를 준비하는 중');return await prepare(root)}
  if(job.action==='publish'){const plan=JSON.parse(await readFile(job.plan,'utf8'));const planRelative=relative(join(root,'.editor-jobs'),resolve(plan.directory));if(resolve(plan.root)!==root||!planRelative||planRelative.startsWith('..')||isAbsolute(planRelative))throw Error('반영 자료 경로가 올바르지 않습니다.');return publish(plan,{node,wrangler,run,progress,signal:cancellation.signal})}
- if(job.action==='connections'){
-  let codex=false,cloudflare=false;try{await run(await commandPath('codex'),['login','status'],{cwd:root});codex=true}catch{}
-  try{const text=await run(node,[wrangler,'whoami'],{cwd:root});cloudflare=/7b33c59c1366ca82db48b21179a06bd1/.test(text)}catch{}
-  return {codex,cloudflare};
- }
+ if(job.action==='connections')return checkConnections({root,node,wrangler,run});
  if(job.action==='loginCodex'){progress('브라우저에서 Codex 로그인을 완료해 주세요.');await run(await commandPath('codex'),['login'],{cwd:root,timeout:600_000});return true}
  if(job.action==='loginCloudflare'){progress('브라우저에서 Cloudflare 로그인을 완료해 주세요.');await run(node,[wrangler,'login'],{cwd:root,timeout:600_000});return true}
  throw Error('지원하지 않는 온라인 작업입니다.');
