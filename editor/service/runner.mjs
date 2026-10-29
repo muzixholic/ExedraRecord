@@ -8,6 +8,7 @@ import {translate} from './translation.mjs';
 import {correctionJob} from './corrections.mjs';
 import {commandPath,executionEnvironment,checkConnections} from './executables.mjs';
 export {commandPath,executableCandidates} from './executables.mjs';
+import {prepareSync,applySync} from './server-sync.mjs';
 import {translatePortrait} from './portrait-translation.mjs';
 const send=value=>process.stdout.write(JSON.stringify(value)+'\n');
 const progress=message=>send({event:'progress',message});
@@ -41,6 +42,8 @@ export async function execute(job){
  if(job.action==='translate')return {...await translate({image:job.image,codex:await commandPath('codex'),run,progress}),sourceImage:job.sourceImage};
  if(job.action==='prepareDeploy'){progress('로컬 기억과 이미지를 고정해 반영 자료를 준비하는 중');return await prepare(root)}
  if(job.action==='publish'){const plan=JSON.parse(await readFile(job.plan,'utf8'));const planRelative=relative(join(root,'.editor-jobs'),resolve(plan.directory));if(resolve(plan.root)!==root||!planRelative||planRelative.startsWith('..')||isAbsolute(planRelative))throw Error('반영 자료 경로가 올바르지 않습니다.');return publish(plan,{node,wrangler,run,progress,signal:cancellation.signal})}
+ if(job.action==='prepareSync')return prepareSync(root,{progress,signal:cancellation.signal});
+ if(job.action==='applySync')return applySync(root,job.plan,{progress,signal:cancellation.signal});
  if(job.action==='connections')return checkConnections({root,node,wrangler,run});
  if(job.action==='loginCodex'){progress('브라우저에서 Codex 로그인을 완료해 주세요.');await run(await commandPath('codex'),['login'],{cwd:root,timeout:600_000});return true}
  if(job.action==='loginCloudflare'){progress('브라우저에서 Cloudflare 로그인을 완료해 주세요.');await run(node,[wrangler,'login'],{cwd:root,timeout:600_000});return true}

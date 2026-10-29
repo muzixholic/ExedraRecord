@@ -1,0 +1,160 @@
+{
+  "acquisition" : "통상",
+  "character_group" : "ja:八雲みたま",
+  "character_ja" : "八雲みたま",
+  "character_ko" : "야쿠모 미타마",
+  "element" : "무속성",
+  "groups" : [
+    "unaffiliated"
+  ],
+  "id" : "memory-2badbefc",
+  "illustration_url" : "/images/upload-03845b4f-e48e-425a-a193-637b31bdada7.png",
+  "image" : "/images/translation-839251ed-1624-4e12-9b2f-4f288fce44d0.png",
+  "limit_breaks" : [
+    {
+      "ja" : "HP・攻撃力・防御力+2%\nMP回復効率+30%",
+      "ko" : "HP·공격력·방어력+2%. MP 회복 효율+30%.",
+      "stage" : 1
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\nバトル開始時自身のMP+50。\n必殺技発動時に味方全体から解除できるデバフ効果+1",
+      "ko" : "HP·공격력·방어력+2%. 전투 시작 시 자신의 MP+50. 필살기 발동 시 아군 전체에게서 해제할 수 있는 디버프 효과+1.",
+      "stage" : 2
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n必殺技Lv上限+3",
+      "ko" : "HP·공격력·방어력+2%. 필살기 레벨 상한+3.",
+      "stage" : 3
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n最大HP+10%、必殺技を発動したときSP+1",
+      "ko" : "HP·공격력·방어력+2%. 최대 HP+10%. 필살기를 발동했을 때 SP+1.",
+      "stage" : 4
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n必殺技Lv上限+3",
+      "ko" : "HP·공격력·방어력+2%. 필살기 레벨 상한+3.",
+      "stage" : 5
+    }
+  ],
+  "limited" : false,
+  "name_ja" : "絶対自壊演舞",
+  "name_ko" : "절대자괴연무",
+  "pending" : [
+
+  ],
+  "pv_url" : "https://youtu.be/PCgoyxKiAuY?si=pifc7KNF7d_HQnqP",
+  "rarity" : 5,
+  "role" : "힐러",
+  "skills" : [
+    {
+      "adjacent_break" : null,
+      "break" : 25,
+      "cost" : "MP 90",
+      "ja" : "敵全体に280%の無属性ダメージを与える。\n味方全体のHPを発動者のHP30%+1200回復する。\nさらに、味方全体のデバフ効果を1個解除する。",
+      "kind" : "필살기",
+      "ko" : "적 전체에게 280%의 무속성 대미지를 준다. 아군 전체의 HP를 발동자 HP의 30%+1200만큼 회복한다. 추가로 아군 전체의 디버프 효과를 1개 해제한다.",
+      "name_ja" : "絶対自壊演舞",
+      "name_ko" : "절대자괴연무"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "さらに【自身のHPが80%以上のとき】\n味方全体に弱点属性に対して与えるダメージ+20%(2ターン)",
+      "kind" : "필살기 조건부 추가 효과",
+      "ko" : "자신의 HP가 80% 이상일 때: 아군 전체가 약점 속성에 대해 주는 대미지+20%(2턴).",
+      "name_ja" : "",
+      "name_ko" : ""
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "味方全体のHPを発動者のHP12%+400回復する。\n無属性の味方全体のMP+5。\n敵全体の攻撃力-5%(2ターン)",
+      "kind" : "전투 스킬",
+      "ko" : "아군 전체의 HP를 발동자 HP의 12%+400만큼 회복한다. 무속성 아군 전체의 MP+5. 적 전체의 공격력-5%(2턴).",
+      "name_ja" : "元気が出るまでい",
+      "name_ko" : "기운이 날 때까지"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : 10,
+      "cost" : null,
+      "ja" : "敵単体に100%の無属性ダメージを与える。",
+      "kind" : "일반 공격",
+      "ko" : "적 하나에게 100%의 무속성 대미지를 준다.",
+      "name_ja" : "",
+      "name_ko" : ""
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "自身が通常攻撃を発動したとき自身の行動順-20%",
+      "kind" : "어빌리티",
+      "ko" : "자신이 일반 공격을 발동했을 때 자신의 행동 순서-20%.",
+      "name_ja" : "ディフェンドゲイン",
+      "name_ko" : "디펜드 게인"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "自身以外の味方が戦闘スキルを発動したとき自身のMP+3",
+      "kind" : "어빌리티 파생 효과",
+      "ko" : "자신 이외의 아군이 전투 스킬을 발동했을 때 자신의 MP+3.",
+      "name_ja" : "",
+      "name_ko" : ""
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "敵全体のデバフ効果が1個以上のとき、味方全体が敵から受けるダメージ-10%",
+      "kind" : "어빌리티 조건부 효과",
+      "ko" : "적 전체의 디버프 효과가 1개 이상일 때: 아군 전체가 적에게 받는 대미지-10%.",
+      "name_ja" : "",
+      "name_ko" : ""
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "【ヒーラーに装備時】\nHP回復量+12%。\n通常攻撃を発動したとき行動順-10%",
+      "kind" : "서포트 어빌리티",
+      "ko" : "힐러에게 장착 시: HP 회복량+12%. 일반 공격을 발동했을 때 행동 순서-10%.",
+      "name_ja" : "クイックベネフィット",
+      "name_ko" : "퀵 베네핏"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "HP回復量+20%。\n自身のHPが80%以上のとき自身が受けるダメージ-20%",
+      "kind" : "전용 EX 결정 어빌리티",
+      "ko" : "HP 회복량+20%. 자신의 HP가 80% 이상일 때 자신이 받는 대미지-20%.",
+      "name_ja" : "サービスしちゃおうかしらぁ！",
+      "name_ko" : "서비스해 버릴까아!"
+    }
+  ],
+  "source_note" : "사용자가 가져온 공식 소개 이미지. AI 초벌 번역 원본.",
+  "source_url" : "",
+  "stats" : {
+    "HP" : 10443,
+    "공격력" : 2449,
+    "방어력" : 3184,
+    "스피드" : 107
+  },
+  "stats_note" : "이미지의 능력치를 그대로 기록했다. 필살기·전투 스킬·일반 공격·어빌리티·서포트 어빌리티·한계돌파는 최대 강화 시 수치다.",
+  "thumbnail_url" : "/images/upload-03845b4f-e48e-425a-a193-637b31bdada7-thumb.jpg",
+  "translation_notes" : [
+    "캐릭터명과 기억명, 스킬명의 한국어 표기는 초벌 번역이다.",
+    "AI 초벌 번역입니다. 원문·수치·고유명사를 확인한 뒤 저장해 주세요."
+  ],
+  "verification" : "AI 초벌 번역 · 원문·수치 검토 대기",
+  "voice_actor" : "호리에 유이",
+  "voice_actor_override" : false,
+  "voice_actor_url" : "https://namu.wiki/w/호리에%20유이",
+  "work" : "magia-record"
+}

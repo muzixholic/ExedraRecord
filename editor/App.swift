@@ -11,6 +11,7 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
     var operation: Process?
     var operationTimer: Timer?
     var preparedPlan: URL?
+    var preparedSync: URL?
     func applicationDidFinishLaunching(_ notification: Notification) {
         let menu = NSMenu(); let item = NSMenuItem(); menu.addItem(item)
         let submenu = NSMenu(); submenu.addItem(withTitle: "기억 입력 도구 종료", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); item.submenu = submenu; NSApp.mainMenu = menu
@@ -101,6 +102,12 @@ final class EditorApp: NSObject, NSApplicationDelegate, WKScriptMessageHandler, 
             case "openCorrectionPage":
                 guard let kind=body["kind"] as? String,["memories","portraits"].contains(kind),let record=body["recordID"] as? String,record.range(of:"^[a-z0-9]+(-[a-z0-9]+)*$",options:.regularExpression) != nil,let url=URL(string:"https://exedra-record.chm1610.workers.dev/#"+kind+"/"+record) else { throw EditorError.message("페이지 주소를 확인해 주세요.") };NSWorkspace.shared.open(url);reply(id,value:true)
             case "connections", "loginCodex", "loginCloudflare": try startOnline(action,id:id)
+            case "prepareSync":
+                guard !dirty else { throw EditorError.message("편집 중인 자료를 먼저 저장해 주세요.") };preparedSync=nil
+                try startOnline(action,id:id)
+            case "applySync":
+                guard !dirty,let plan=preparedSync else { throw EditorError.message("로컬 갱신 준비를 먼저 진행해 주세요.") }
+                try startOnline(action,id:id,payload:["plan":plan.path])
             case "prepareDeploy":
                 guard !dirty else { throw EditorError.message("편집 중인 기억을 먼저 저장해 주세요.") }
                 for entry in try store.load() { try MemoryStore.validate(entry["memory"] as! [String:Any]) }

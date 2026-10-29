@@ -7,3 +7,7 @@ dialog#translation-dialog{width:min(900px,90vw);max-width:900px;max-height:90vh;
 .tag-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.tag-option{border-radius:999px;padding:7px 13px;font-size:13px;min-height:36px}.tag-option[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#152027;font-weight:600}.tag-option[aria-pressed="true"]::before{content:'✓ ';}.tag-option:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.affiliation-tag{display:inline-block;border:1px solid var(--gold);border-radius:999px;padding:2px 10px;color:var(--gold);font-size:12px}.group-filter{grid-column:1/-1}.affiliation-field{color:var(--muted);font-size:12px}.memory-metadata{flex-wrap:wrap}
 
 .corrections-manager{width:min(1200px,94vw);max-width:94vw}.corrections-scroll{overflow:auto;max-height:55vh}.corrections-manager table{width:100%;border-collapse:collapse}.corrections-manager th,.corrections-manager td{padding:12px;text-align:left;border-bottom:1px solid #52616a;vertical-align:top}.corrections-manager th{position:sticky;top:0;background:#1c2b32}.corrections-manager td{white-space:pre-wrap;overflow-wrap:anywhere;min-width:110px}.corrections-manager td:nth-child(3){min-width:260px}.corrections-manager td small{display:block}.corrections-manager td button{max-width:280px;text-align:left}
+
+/* 안내 메시지 높이가 달라져도 하단 도구에 접근할 수 있게 합니다. */
+body{height:100vh;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+.workspace{height:auto;min-height:0}.sidebar-footer{max-height:50%;min-height:95px;overflow:auto;flex-shrink:1}

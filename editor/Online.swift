@@ -34,6 +34,8 @@ extension EditorApp {
             let events=text.split(separator:"\n").compactMap { try? JSONSerialization.jsonObject(with:Data($0.utf8)) as? [String:Any] }
             if let result=events.last(where:{$0["event"] as? String == "result"}) {
                 if action == "prepareDeploy",let value=result["value"] as? [String:Any],let path=value["directory"] as? String { self.preparedPlan=URL(fileURLWithPath:path).appendingPathComponent("plan.json") }
+                if action == "prepareSync",let value=result["value"] as? [String:Any],let path=value["directory"] as? String { self.preparedSync=URL(fileURLWithPath:path).appendingPathComponent("plan.json") }
+                if action == "applySync" { self.preparedSync=nil;self.preparedPlan=nil }
                 self.reply(id,value:result["value"])
             } else { self.reply(id,error:events.last(where:{$0["event"] as? String == "error"})?["message"] as? String ?? "작업이 종료되었습니다. 연결 상태를 확인해 주세요.") }
         }}

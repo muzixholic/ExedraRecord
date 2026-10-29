@@ -5,7 +5,7 @@ const fs=require('node:fs/promises');
 const {spawn}=require('node:child_process');
 const {randomUUID}=require('node:crypto');
 const os=require('node:os');
-let window,store,MemoryStore,PortraitStore,dirty=false,operation=null,prepared=null,busy=false;
+let window,store,MemoryStore,PortraitStore,dirty=false,operation=null,prepared=null,preparedSync=null,busy=false;
 const index=join(__dirname,'ui/index.html');
 const settings=()=>join(app.getPath('userData'),'project.json');
 async function discard(){if(operation){await dialog.showMessageBox(window,{message:'작업을 마치거나 취소한 뒤 진행해 주세요.',buttons:['확인']});return false}if(!dirty)return true;return (await dialog.showMessageBox(window,{type:'question',message:'저장하지 않은 변경이 있습니다.',detail:'변경을 버리고 계속할까요?',buttons:['계속 편집','변경 버리기'],defaultId:0,cancelId:0})).response===1}
@@ -22,7 +22,7 @@ async function online(action,payload={}){
   child.stderr.on('data',chunk=>{stderr=(stderr+chunk).slice(-2000)});
   const cleanup=()=>{operation=null;fs.rm(dir,{recursive:true,force:true}).catch(()=>{})};
   child.once('error',()=>{cleanup();reject(Error('온라인 작업을 시작하지 못했습니다.'))});
-  child.once('close',code=>{cleanup();if(code===0&&result!==undefined)resolve(result);else reject(Error(error||'작업이 취소되었거나 종료되었습니다. 연결 상태를 확인해 주세요.'))});
+  child.once('close',code=>{cleanup();if(code===0&&result!==undefined){if(action==='prepareSync')preparedSync=join(result.directory,'plan.json');if(action==='applySync'){prepared=null;preparedSync=null}resolve(result)}else reject(Error(error||'작업이 취소되었거나 종료되었습니다. 연결 상태를 확인해 주세요.'))});
  });
 }
 async function pickImage(){const result=await dialog.showOpenDialog(window,{title:'가져올 이미지 선택',properties:['openFile'],filters:[{name:'이미지',extensions:['png','jpg','jpeg','webp','bmp']}]});return result.canceled?null:result.filePaths[0]}
@@ -50,6 +50,8 @@ async function handle(body){
   if(action==='preview'){if(!body.path)return null;const image=nativeImage.createFromPath(await store.localAsset(body.path));return image.isEmpty()?null:'data:image/jpeg;base64,'+resized(image,1000).toJPEG(85).toString('base64')}
   if(['listCorrections','completeCorrection'].includes(action))return await online(action,{status:body.status,offset:body.offset,requestID:body.requestID});
   if(action==='openCorrectionPage'){if(!['memories','portraits'].includes(body.kind)||typeof body.recordID!=='string'||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.recordID))throw Error('페이지 주소를 확인해 주세요.');await shell.openExternal('https://exedra-record.chm1610.workers.dev/#'+body.kind+'/'+body.recordID);return true}
+  if(action==='prepareSync'){if(dirty)throw Error('편집 중인 자료를 먼저 저장해 주세요.');preparedSync=null;return await online(action)}
+  if(action==='applySync'){if(dirty||!preparedSync)throw Error('로컬 갱신 준비를 먼저 진행해 주세요.');return await online(action,{plan:preparedSync})}
   if(['connections','loginCodex','loginCloudflare'].includes(action))return await online(action);
   if(['translate','translatePortrait'].includes(action)){let image=body.image;if(!image){const source=await pickImage();if(!source)return null;image=(await importImage(source)).image}return await online(action,{image:await store.localAsset(image),sourceImage:image})}
   if(action==='export'){if(dirty)throw Error('편집 중인 기억을 먼저 저장해 주세요.');return await store.exportMigration()}

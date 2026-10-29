@@ -1,5 +1,6 @@
 [
   {
+    "character_group" : "ja:美樹さやか",
     "character_ja" : "美樹さやか",
     "character_ko" : "미키 사야카",
     "voice_actor" : "키타무라 에리",
@@ -24,12 +25,14 @@
     "voice_actor_url" : "https://namu.wiki/w/아마키%20샐리"
   },
   {
+    "character_group" : "kaname-madoka",
     "character_ja" : "鹿目まどか",
     "character_ko" : "카나메 마도카",
     "voice_actor" : "유우키 아오이",
     "voice_actor_url" : "https://namu.wiki/w/유우키%20아오이"
   },
   {
+    "character_group" : "ja:巴マミ",
     "character_ja" : "巴マミ",
     "character_ko" : "토모에 마미",
     "voice_actor" : "미즈하시 카오리",
@@ -42,12 +45,14 @@
     "voice_actor_url" : "https://namu.wiki/w/아마미야%20소라"
   },
   {
+    "character_group" : "ja:環いろは",
     "character_ja" : "環いろは",
     "character_ko" : "타마키 이로하",
     "voice_actor" : "아사쿠라 모모",
     "voice_actor_url" : "https://namu.wiki/w/아사쿠라%20모모"
   },
   {
+    "character_group" : "ja:佐倉杏子",
     "character_ja" : "佐倉 杏子",
     "character_ko" : "사쿠라 쿄코",
     "voice_actor" : "노나카 아이",
@@ -136,5 +141,109 @@
     "character_ko" : "모모에 나기사",
     "voice_actor" : "아스미 카나",
     "voice_actor_url" : "https://namu.wiki/w/아스미%20카나"
+  },
+  {
+    "character_ja" : "悪魔ほむら",
+    "character_ko" : "악마 호무라",
+    "voice_actor" : "사이토 치와",
+    "voice_actor_url" : "https://namu.wiki/w/사이토%20치와"
+  },
+  {
+    "character_group" : "ja:入名クシュ",
+    "character_ja" : "入名クシュ",
+    "character_ko" : "이리나 쿠슈",
+    "voice_actor" : "코가 아오이",
+    "voice_actor_url" : "https://namu.wiki/w/코가%20아오이"
+  },
+  {
+    "character_group" : "ja:都ひなの",
+    "character_ja" : "都ひなの",
+    "character_ko" : "미야코 히나노",
+    "voice_actor" : "아사히나 마도카",
+    "voice_actor_url" : "https://namu.wiki/w/아사히나%20마도카"
+  },
+  {
+    "character_group" : "ja:木崎衣美里",
+    "character_ja" : "木崎衣美里",
+    "character_ko" : "키자키 에미리",
+    "voice_actor" : "키토 아카리",
+    "voice_actor_url" : "https://namu.wiki/w/키토%20아카리"
+  },
+  {
+    "character_group" : "ja:浅古小糸",
+    "character_ja" : "浅古小糸",
+    "character_ko" : "아사코 코이토",
+    "voice_actor" : "아케사카 사토미",
+    "voice_actor_url" : "https://namu.wiki/w/아케사카%20사토미"
+  },
+  {
+    "character_group" : "ja:雪野かなえ",
+    "character_ja" : "雪野かなえ",
+    "character_ko" : "유키노 카나에",
+    "voice_actor" : "모리 나나코",
+    "voice_actor_url" : "https://namu.wiki/w/모리%20나나코"
+  },
+  {
+    "character_group" : "ja:愛生まばゆ",
+    "character_ja" : "愛生まばゆ",
+    "character_ko" : "아키 마바유",
+    "voice_actor" : "하야미 사오리",
+    "voice_actor_url" : "https://namu.wiki/w/하야미%20사오리"
+  },
+  {
+    "character_group" : "ja:アリナ・グレイ",
+    "character_ja" : "アリナ・グレイ",
+    "character_ko" : "알리나 그레이",
+    "voice_actor" : "타케타츠 아야나",
+    "voice_actor_url" : "https://namu.wiki/w/타케타츠%20아야나"
+  },
+  {
+    "character_group" : "ja:梓みふゆ",
+    "character_ja" : "梓みふゆ",
+    "character_ko" : "아즈사 미후유",
+    "voice_actor" : "나카하라 마이",
+    "voice_actor_url" : "https://namu.wiki/w/나카하라%20마이"
+  },
+  {
+    "character_group" : "ja:八雲みたま",
+    "character_ja" : "八雲みたま",
+    "character_ko" : "야쿠모 미타마",
+    "voice_actor" : "호리에 유이",
+    "voice_actor_url" : "https://namu.wiki/w/호리에%20유이"
+  },
+  {
+    "character_group" : "ja:安名メル",
+    "character_ja" : "安名メル",
+    "character_ko" : "안나 메루",
+    "voice_actor" : "타카오 카논",
+    "voice_actor_url" : "https://namu.wiki/w/타카오%20카논"
+  },
+  {
+    "character_group" : "ja:万年桜のウワサ",
+    "character_ja" : "万年桜のウワサ",
+    "character_ko" : "만년 벚꽃의 소문",
+    "voice_actor" : "스즈키 미노리",
+    "voice_actor_url" : "https://namu.wiki/w/스즈키%20미노리"
+  },
+  {
+    "character_group" : "ja:環うい",
+    "character_ja" : "環うい",
+    "character_ko" : "타마키 우이",
+    "voice_actor" : "이와미 마나카",
+    "voice_actor_url" : "https://namu.wiki/w/이와미%20마나카"
+  },
+  {
+    "character_group" : "ja:里見灯花",
+    "character_ja" : "里見灯花",
+    "character_ko" : "사토미 토우카",
+    "voice_actor" : "쿠기미야 리에",
+    "voice_actor_url" : "https://namu.wiki/w/쿠기미야%20리에"
+  },
+  {
+    "character_group" : "ja:柊ねむ",
+    "character_ja" : "柊ねむ",
+    "character_ko" : "히이라기 네무",
+    "voice_actor" : "모로호시 스미레",
+    "voice_actor_url" : "https://namu.wiki/w/모로호시%20스미레"
   }
 ]

@@ -161,3 +161,5 @@ if(window.desktopEditor){for(const element of document.querySelectorAll('button,
 $('#switch-portraits').onclick=()=>run(async()=>{if(await discard())await native('switchEditor',{kind:'portraits'})});
 
 installCorrections({native,run});
+
+window.setupServerSync({native,online,run,message,isDirty:()=>dirty,reload:async()=>applyProject(await native('load'))});

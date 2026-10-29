@@ -1,0 +1,122 @@
+{
+  "acquisition" : "통상",
+  "character_group" : "ja:環いろは",
+  "character_ja" : "環いろは",
+  "character_ko" : "타마키 이로하",
+  "element" : "어둠속성",
+  "groups" : [
+    "mikazuki"
+  ],
+  "id" : "memory-64ca5c75",
+  "illustration_url" : "/images/upload-8937fcf9-9b05-4715-adf3-09ae476d0c23.png",
+  "image" : "/images/translation-36a3f0da-c618-4aa7-a2b1-b499f6c5a2bb.png",
+  "limit_breaks" : [
+    {
+      "ja" : "HP・攻撃力・防御力+2%\nMP回復効率+30%",
+      "ko" : "HP·공격력·방어력 +2%. MP 회복 효율 +30%.",
+      "stage" : 1
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\nリジェネレイトの効果ターン+1、味方全体のHP回復量+20%",
+      "ko" : "HP·공격력·방어력 +2%. 리제네레이트의 효과 턴 +1, 아군 전체의 HP 회복량 +20%.",
+      "stage" : 2
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n必殺技Lv上限+3",
+      "ko" : "HP·공격력·방어력 +2%. 필살기 Lv 상한 +3.",
+      "stage" : 3
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n最大HP+10%、必殺技を発動したときSP+1",
+      "ko" : "HP·공격력·방어력 +2%. 최대 HP +10%, 필살기를 발동했을 때 SP+1.",
+      "stage" : 4
+    },
+    {
+      "ja" : "HP・攻撃力・防御力+2%\n必殺技Lv上限+3",
+      "ko" : "HP·공격력·방어력 +2%. 필살기 Lv 상한 +3.",
+      "stage" : 5
+    }
+  ],
+  "limited" : false,
+  "name_ja" : "沈黙のドッペル",
+  "name_ko" : "침묵의 도펠",
+  "pending" : [
+
+  ],
+  "pv_url" : "https://youtu.be/SCqZuekXN70?si=WUSrjllpVCLHNOuW",
+  "rarity" : 5,
+  "role" : "힐러",
+  "skills" : [
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "敵単体に360%の闇属性ダメージを与える。\n味方全体の攻撃力+15%(2ターン)。\n味方全体のHPを発動者の攻撃力60%+1500回復する",
+      "kind" : "필살기",
+      "ko" : "적 하나에게 360%의 어둠속성 대미지를 준다. 아군 전체의 공격력 +15%(2턴). 아군 전체의 HP를 발동자의 공격력 60%+1500만큼 회복한다.",
+      "name_ja" : "沈黙のドッペル",
+      "name_ko" : "침묵의 도펠"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "敵単体に100%の闇属性ダメージを与える",
+      "kind" : "일반 공격",
+      "ko" : "적 하나에게 100%의 어둠속성 대미지를 준다.",
+      "name_ja" : "",
+      "name_ko" : ""
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "味方全体のHPを発動者の攻撃力25%+450回復し、リジェネレイトを付与する(最大HP8%/2ターン)",
+      "kind" : "전투 스킬",
+      "ko" : "아군 전체의 HP를 발동자의 공격력 25%+450만큼 회복하고, 리제네레이트를 부여한다(최대 HP 8%/2턴).",
+      "name_ja" : "ラピダ・グアリジョーネ",
+      "name_ko" : "라피다 구아리조네"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "リジェネレイトが付与されている味方全体の攻撃力+10%、クリティカル率+10%。\nバトル開始時に行動順+40%",
+      "kind" : "어빌리티",
+      "ko" : "리제네레이트가 부여된 아군 전체의 공격력 +10%, 크리티컬 확률 +10%. 배틀 시작 시 행동 순서 +40%.",
+      "name_ja" : "クイックシャープ",
+      "name_ko" : "퀵 샤프"
+    },
+    {
+      "adjacent_break" : null,
+      "break" : null,
+      "cost" : null,
+      "ja" : "【ヒーラーに装備時】\nHP回復量+12%。\nバトル開始時に行動順+15%",
+      "kind" : "서포트 어빌리티",
+      "ko" : "【힐러에게 장착 시】 HP 회복량 +12%. 배틀 시작 시 행동 순서 +15%.",
+      "name_ja" : "クイックベネフィット",
+      "name_ko" : "퀵 베네핏"
+    }
+  ],
+  "source_note" : "사용자가 가져온 공식 소개 이미지. AI 초벌 번역 원본.",
+  "source_url" : "",
+  "stats" : {
+    "HP" : 8356,
+    "공격력" : 2585,
+    "방어력" : 2426,
+    "스피드" : 102
+  },
+  "stats_note" : "이미지에 표시된 최대 강화 시 수치.",
+  "thumbnail_url" : "/images/upload-8937fcf9-9b05-4715-adf3-09ae476d0c23-thumb.jpg",
+  "translation_notes" : [
+    "전투 스킬명 'ラピダ・グアリジョーネ'의 한국어 음역 '라피다 구아리조네'는 초벌이다.",
+    "이미지에 소모 자원과 브레이크 감소량은 표시되어 있지 않다.",
+    "이미지에 전용 EX 결정 어빌리티는 표시되어 있지 않다.",
+    "AI 초벌 번역입니다. 원문·수치·고유명사를 확인한 뒤 저장해 주세요."
+  ],
+  "verification" : "AI 초벌 번역 · 원문·수치 검토 대기",
+  "voice_actor" : "아사쿠라 모모",
+  "voice_actor_override" : false,
+  "voice_actor_url" : "https://namu.wiki/w/아사쿠라%20모모",
+  "work" : "magia-record"
+}
